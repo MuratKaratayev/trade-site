@@ -4,6 +4,7 @@ import { company, nav } from '@/content/site';
 import { ogBase, twitterBase } from '@/lib/seo';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
+import { SmoothAnchors } from '@/components/layout/SmoothAnchors';
 import './globals.css';
 
 const unbounded = Unbounded({ subsets: ['cyrillic', 'latin'], weight: ['500', '600'], display: 'swap', variable: '--font-unbounded' });
@@ -59,6 +60,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Header nav={nav} phone={company.phones[0]} email={company.email} />
         <main id="main">{children}</main>
         <Footer />
+        <SmoothAnchors />
       </body>
     </html>
   );

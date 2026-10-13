@@ -5,7 +5,14 @@ import { FigureSvg } from './FigureSvg';
 import { LazyFigure } from './LazyFigure';
 import { useRef } from 'react';
 import { useWave } from './useWave';
-import { useScrollWave } from './useScrollWave';
+import { isTouchOnly, useScrollWave } from './useScrollWave';
+import type { WaveTiming } from './useWave';
+
+// Десктоп (курсор) — тайминги брендбука: 600 мс, 50 мс на кольцо.
+// Телефон (волна от прокрутки) — медленнее, по просьбе владельца: 1000 мс, 90 мс на кольцо.
+const TOUCH_TIMING: WaveTiming = { duration: 1000, stagger: 90 };
+const DESKTOP_TIMING: WaveTiming = { duration: 600, stagger: 50 };
+const timing = () => (isTouchOnly() ? TOUCH_TIMING : DESKTOP_TIMING);
 
 type FigureProps = { intensity?: number; className?: string };
 
@@ -21,7 +28,7 @@ const fieldPick = (t: number) => {
 };
 
 function KipField({ intensity = 0.6 }: FigureProps) {
-  const { values, activate } = useWave(N * N, fieldDistance);
+  const { values, activate } = useWave(N * N, fieldDistance, timing());
   const ref = useRef<SVGSVGElement>(null);
   useScrollWave(ref, fieldPick, activate);
   const m = amplitude(intensity);
@@ -53,7 +60,7 @@ const linear = (p: number, q: number) => Math.abs(p - q);
 const railPick = (t: number) => Math.min(7, Math.floor(t * 8));
 
 function DinRail({ intensity = 0.6 }: FigureProps) {
-  const { values, activate } = useWave(8, linear);
+  const { values, activate } = useWave(8, linear, timing());
   const ref = useRef<SVGSVGElement>(null);
   useScrollWave(ref, railPick, activate);
   const m = amplitude(intensity);
@@ -95,7 +102,7 @@ function DinRail({ intensity = 0.6 }: FigureProps) {
 const rackPick = (t: number) => Math.min(5, Math.floor(t * 6));
 
 function Rack({ intensity = 0.6 }: FigureProps) {
-  const { values, activate } = useWave(6, linear);
+  const { values, activate } = useWave(6, linear, timing());
   const ref = useRef<SVGSVGElement>(null);
   useScrollWave(ref, rackPick, activate);
   const m = amplitude(intensity);

@@ -13,7 +13,12 @@ const reducedMotion = () =>
  * Возвращает текущие значения 0…1 для каждого элемента и функцию activate.
  * requestAnimationFrame крутится только пока что-то движется.
  */
-export function useWave(count: number, distance: (a: number, b: number) => number) {
+export type WaveTiming = { duration: number; stagger: number };
+const DEFAULT_TIMING: WaveTiming = { duration: DURATION, stagger: STAGGER };
+
+export function useWave(count: number, distance: (a: number, b: number) => number, timing: WaveTiming = DEFAULT_TIMING) {
+  const t = useRef(timing);
+  t.current = timing;
   const els = useRef<El[]>(Array.from({ length: count }, () => ({ from: 0, to: 0, start: 0, cur: 0, d: 0 })));
   const raf = useRef<number | null>(null);
   const [, setFrame] = useState(0);
@@ -28,7 +33,7 @@ export function useWave(count: number, distance: (a: number, b: number) => numbe
           moving = true;
           continue;
         }
-        const p = Math.min(1, (now - e.start) / DURATION);
+        const p = Math.min(1, (now - e.start) / t.current.duration);
         e.cur = e.from + (e.to - e.from) * EASE(p);
         if (p < 1) moving = true;
       }
@@ -51,12 +56,12 @@ export function useWave(count: number, distance: (a: number, b: number) => numbe
         if (target === e.to) return;
         e.from = e.cur;
         e.to = target;
-        e.start = now + (red ? 0 : ring * STAGGER);
+        e.start = now + (red ? 0 : ring * t.current.stagger);
         // prefers-reduced-motion: сразу конечное состояние, без анимации
         if (red) {
           e.cur = target;
           e.from = target;
-          e.start = now - DURATION;
+          e.start = now - t.current.duration;
         }
       });
       kick();
