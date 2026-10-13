@@ -1,0 +1,27 @@
+import { services } from '@/content/site';
+import { SectionHead } from '@/components/ui/SectionHead';
+
+export function Services() {
+  return (
+    <section id="services" aria-labelledby="services-title" className="section border-t border-line">
+      <div className="container-site flex flex-col gap-12">
+        <SectionHead label="Услуги" title="Полный комплекс инжиниринговых услуг в области АСУТП" id="services-title">
+          От обследования объекта до сервиса. Весь цикл или отдельный этап.
+        </SectionHead>
+        <ol className="grid grid-cols-1 border-t border-line md:grid-cols-2 lg:grid-cols-3">
+          {services.map((s, i) => (
+            <li key={s.title} className="flex flex-col gap-4 border-b border-line py-8 md:pr-8">
+              <span className="t-label">{String(i + 1).padStart(2, '0')}</span>
+              <h3 className="t-h3">{s.title}</h3>
+              <ul className="flex flex-col gap-2 text-muted">
+                {s.items.map((it) => (
+                  <li key={it}>{it}</li>
+                ))}
+              </ul>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
+  );
+}

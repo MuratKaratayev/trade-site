@@ -8,6 +8,151 @@
 
 # HANDOFF — trade-site
 
+## 🟢 СЕССИЯ 2026-10-13 (3) — сайт на Next.js по брендбуку
+
+**Задача.** Пересобрать сайт ТОО «TRADE-Инжиниринг» (старый — https://trade-engeeniring.kz/, MODX)
+по согласованному брендбуку. Стек: Next.js (App Router, TS), Tailwind v4 + CSS-токены, Vercel.
+Подробное ТЗ — в сообщении владельца (в репозитории не сохранено). Ключевое ниже и в `PLAN.md`.
+Решения владельца:
+- переделать PR #1 (Astro удалён);
+- **Supabase пока не подключать**;
+- контент брать со старого сайта;
+- где данных нет — видимый плейсхолдер `[ОТ КЛИЕНТА: …]`.
+
+**Брендбук = источник правды:** `docs/brandbook/TRADE-brandbook.dc.html`. Это бандл
+(gzip+base64 внутри `<script type="__bundler/manifest">`, два уровня вложенности). Распаковка:
+`python3 docs/brandbook/unbundle.py <html> <папка>`, затем то же для каждого листа.
+Скрипт фигур уже извлечён: `docs/brandbook/Brand-03-Motion.script.js`.
+Ссылка на брендбук на Vercel закрыта Vercel Authentication, а у Vercel-коннектора к ней нет
+доступа (403/404) — не тратить время.
+
+**Что работает и как проверено** (локально, `next build` + `next start`, Playwright/Chromium):
+- `npm run build` и `npx tsc --noEmit` — без ошибок. Маршруты: `/`, `/products/[4 slug]`,
+  `/sitemap.xml`, `/robots.txt`, `/icon.png`, 404.
+- **Тема:**
+  - первый показ по `prefers-color-scheme` (dark→dark, light→light);
+  - сохранённый выбор применяется до DOMContentLoaded (без мигания) и после reload побеждает ОС;
+  - плашка логотипа белая в тёмной теме и прозрачная в светлой.
+- **Форма:**
+  - пустая отправка даёт 3 ошибки zod;
+  - валидная показывает честное «приём не подключён» и телефон;
+  - honeypot за экраном и `aria-hidden`.
+- Лайтбокс сертификатов на `<dialog>` открывается и закрывается по Esc.
+- **Фигуры:**
+  - наведение подсвечивает элемент, уход курсора возвращает всё в покой;
+  - reduced-motion — конечное состояние меньше чем за 40 мс;
+  - тач-касание (iPhone 13) активирует фигуру;
+  - lazy-mount: «Поле КИП» не смонтировано до прокрутки.
+- Мобильное меню открывается и закрывается по ссылке. Горизонтального скролла нет на 390 px и iPhone 13.
+- **Редиректы:** все старые URL отдают **один** 301 (проверено `curl` по списку в `next.config.ts`).
+- **Lighthouse 13.5.0 локально:**
+  - десктоп — 100/100/100/100 (`/` и `/products/kontrollery`);
+  - мобильный `/` — perf 93–95 (3 прогона после прогрева; самый первый, «холодный», дал 71), a11y/BP/SEO 100;
+  - мобильный `/products/kontrollery` — perf 92.
+- Хардкод-цветов в `components/` нет (grep). Красный текст только через `--accent-text` (grep).
+- **НЕ проверено:** превью на Vercel (сборка там ещё не запускалась), Safari/Firefox,
+  реальные устройства, скринридеры.
+
+**Частично или не сделано:**
+- Хранилище заявок: `lib/leads.ts` → `saveLead()` всегда возвращает `'not-configured'`.
+- Миграции Supabase нет (по решению владельца).
+- Уведомления о заявках не сделаны (предложение — в `PLAN.md`).
+- Партнёры: `partners = []`, блок не выводится.
+
+**Последнее изменение.**
+- Добавлен `vercel.json` с `"framework": "nextjs"`: проект Vercel до этого собирал Astro, а прочитать
+  его настройки коннектор не смог.
+- Брендбук сохранён в `docs/brandbook/`.
+
+**Изменённые и новые файлы (главное):**
+- `app/layout.tsx`:
+  - шрифты Unbounded 500/600 и Onest 400/500/600 через `next/font/google` (cyrillic+latin);
+  - `themeScript` в `<head>`;
+  - JSON-LD Organization;
+  - `metadata` и `viewport`.
+- `app/globals.css`:
+  - токены из брендбука + производные `--figure-hot` (0.28 тёмная / **0.16 светлая**, как в скрипте листа 03)
+    и `--photo-overlay`;
+  - маппинг в Tailwind (`@theme inline`);
+  - типографика `.t-display/.t-h2/.t-h3/.t-body-l/.t-label`;
+  - `.btn`, `.field`, `.photo`, `.placeholder`.
+- `components/figures/iso.ts` — `iso()`, `faces()`, `hull()`, `pushBox()`, `EASE`, `FALLOFF`, `STAGGER`,
+  `DURATION`, `amplitude()` (m = 0.35 + 1.1·intensity). Перенесено 1:1 из листа 03.
+- `components/figures/useWave.ts` — `activate()`/`kick()` из брендбука, rAF только пока есть движение.
+- `components/figures/FigureSvg.tsx` — события только на статичных hit-полигонах: мышь — `pointerenter`,
+  тач — `pointerdown`.
+- `components/figures/Figures.tsx` — `FigureRack` (hero), `FigureDinRail` (Продукция),
+  `FigureKipField` (Наш опыт).
+- `components/sections/*` и `components/layout/*` — секции и шапка.
+- `app/products/[slug]/page.tsx` — 4 страницы продукции.
+- `app/actions/lead.ts`, `lib/lead-schema.ts`, `lib/leads.ts` — форма.
+- `next.config.ts` — 301 со старых URL, `skipTrailingSlashRedirect` + общее правило `/:path+/` → `/:path+`.
+- `content/site.ts` — весь контент.
+- `public/logo.png` — файл клиента без изменений (совпадает побайтно с PNG в брендбуке).
+  `public/certificates/*`, `app/icon.png` — вырезка знака из PNG, без перекраски.
+
+## Ключевые решения
+- **Стек:** `next@16.3.7`, `react@19.3.0`, `tailwindcss@4.3.3`, `zod@4.6.5`, `typescript@5.9.3`.
+  Версии закреплены точно и старше двух недель на 2026-10-13. TS 7.x (нативный порт) не брали:
+  совместимость с Next 16 не проверена.
+- **Тема:** атрибут `data-theme` на `<html>` (`dark` по умолчанию в SSR). Inline-скрипт выбирает
+  `localStorage.theme` → `prefers-color-scheme` → dark. Режимов два, а не три (по брифу).
+- **Токены:**
+  - компоненты используют только токены, `--accent` — только заливки и кнопки;
+  - красный текст — `--accent-text`;
+  - hover у primary-кнопки — подчёркивание: осветление красного уронило бы контраст белого ниже 4,5.
+- **Моушн:** вариант A брендбука (свои SVG-компоненты). Hairline (вариант B) **не подключён** — нужно
+  согласие владельца. На экране не больше одной фигуры: hero / продукция / опыт.
+- **Контраст (проверено расчётом):** все пары «текст/фон» ≥ AA. `--figure-dim` (2,2–3,1) — только для линий.
+  Текст поверх фото не ставим: при затемнении .55 на светлом кадре было бы ~3,6. Подписи — под фото.
+- **Логотип:** `next/image` с `unoptimized` (растр 218×32 оставляем как есть). Ширина 160 (моб.) / 218.
+  Шапка 96 px на десктопе — охранное поле.
+- **Факты** — только со старого сайта. Отрасли объектов «Угледобыча» (Шубарколь — «разрез») и
+  «Химическая промышленность» (Казсода — «завод кальцинированной соды») выведены из формулировок
+  старого сайта. Если клиент назовёт иначе — поправить в `content/site.ts`.
+
+## Неудачные попытки и грабли
+
+### Топ-грабли (удар по проду, деньгам или клиенту)
+- Пока нет. Прод (`trade-engeeniring.kz`) не трогали, домен на Vercel не переключали.
+
+### Прочее
+- `pkill -f "next start"` в Bash убивает и сам shell (паттерн совпадает с командой) → exit 144.
+  Использовать `kill $(pgrep -f "next-server|next start" | grep -v $$)`.
+- Встроенная нормализация слэша Next даёт цепочку 308 → 301 для `/uslugi/`. Решено через
+  `skipTrailingSlashRedirect: true` + явные правила (см. `next.config.ts`).
+- В Playwright `addInitScript` выполняется при КАЖДОЙ навигации, включая reload. Не задавать через него
+  `localStorage`, если проверяется сохранение. `isVisible()` считает видимым элемент за экраном.
+  `colorScheme: 'no-preference'` в Chromium матчится как light.
+- Первый прогон Lighthouse после `next start` «холодный» (perf 71). Мерить после прогрева, 3 прогона.
+- Случайный `git rm --cached -r public/img/projects` снял фото с индекса — вернул `git add`.
+  Перед коммитом смотреть `git status`.
+
+## План на следующий шаг
+1. **Следующий конкретный шаг:** дождаться сборки превью на Vercel для нового коммита PR #1.
+   Если упала — посмотреть логи (коннектор Vercel к проекту доступа не имеет: просить владельца или
+   смотреть статус-комментарий vercel[bot] в PR). Затем прогнать Lighthouse на превью.
+2. Получить решение по хранилищу заявок: Supabase или другое. Тогда:
+   - миграция `supabase/migrations/*_create_leads.sql` (таблица `leads`, RLS без политик);
+   - `saveLead()` через service role из env;
+   - уведомление в Telegram или по email — по согласованию.
+3. Собрать ответы клиента по «Открытым вопросам» (`PLAN.md`) и заменить плейсхолдеры в `content/site.ts`.
+4. Перед запуском: направить домен на Vercel (тогда заработают 301), проверить `metadataBase`
+   (`company.url`).
+
+## Команды и окружение
+- Node ≥ 20.9 (проверено на v22.22.0). `npm install` → `npm run dev` (http://localhost:3000).
+  `npm run build` / `npm run start` / `npm run typecheck`.
+- Переменных окружения сейчас нет. Будущие — в `.env.example` (`SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`).
+- Lighthouse локально:
+  `CHROME_PATH=/opt/pw-browsers/chromium-1194/chrome-linux/chrome npx -y lighthouse@13.5.0 http://localhost:3000/ --chrome-flags="--headless=new --no-sandbox"`
+- Playwright с Chromium предустановлен глобально (`npm root -g`). `playwright install` не запускать.
+- Git: ветка `claude/gallant-rubin-l1axwb` → PR https://github.com/MuratKaratayev/trade-site/pull/1 в `main`.
+  Vercel сам собирает превью для каждого пуша. Превью закрыто Vercel Authentication.
+
+# ═══ АРХИВ: целиком не читать, только grep -n ═══
+
+<!-- перенесено 2026-10-13 (сессия 3): устарело после перехода с Astro на Next.js -->
 ## 🟢 СЕССИЯ 2026-10-13 (2) — прототип редизайна
 
 **Задача.** Клиент — ТОО «TRADE-Инжиниринг» (Павлодар, интегратор АСУ ТП), его старый сайт:
@@ -120,8 +265,6 @@ https://trade-engeeniring.kz/ (MODX, 2020 год). Нужно переделат
   Remote: https://github.com/MuratKaratayev/trade-site
 - Playwright с Chromium предустановлен в облачном окружении (глобальный `npm root -g`,
   браузеры в `/opt/pw-browsers`). Не запускать `playwright install`.
-
-# ═══ АРХИВ: целиком не читать, только grep -n ═══
 
 <!-- перенесено 2026-10-13 (сессия 2) -->
 ## 🟢 СЕССИЯ 2026-10-13
