@@ -1,4 +1,5 @@
 import { company } from '@/content/site';
+import { hyphenate } from '@/lib/hyphenate';
 import { FigureRack } from '@/components/figures/Figures';
 
 export function Hero() {
@@ -11,7 +12,7 @@ export function Hero() {
             {company.overline}
           </span>
           <h1 id="hero-title" className="t-display">
-            {company.slogan}
+            {hyphenate(company.slogan)}
           </h1>
           <p className="t-body-l max-w-[560px] text-muted">{company.lead}</p>
           <div className="mt-2 flex flex-wrap gap-3">

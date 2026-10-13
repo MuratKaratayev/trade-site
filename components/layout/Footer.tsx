@@ -1,4 +1,5 @@
 import { company, nav } from '@/content/site';
+import { MapLink } from '@/components/ui/MapLink';
 
 export function Footer() {
   const year = new Date().getFullYear();
@@ -29,7 +30,9 @@ export function Footer() {
           <a href={`mailto:${company.email}`} className="link-accent">
             {company.email}
           </a>
-          <p className="text-muted">{company.address}</p>
+          <MapLink query={company.mapQuery} className="text-muted underline decoration-line underline-offset-4 hover:text-accent-text">
+            {company.address}
+          </MapLink>
         </div>
         <dl className="col-span-12 flex flex-col gap-2 text-sm md:col-span-3">
           {company.requisites.map((r) => (

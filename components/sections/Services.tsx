@@ -1,5 +1,6 @@
 import { services } from '@/content/site';
 import { SectionHead } from '@/components/ui/SectionHead';
+import { hyphenate } from '@/lib/hyphenate';
 
 export function Services() {
   return (
@@ -12,7 +13,7 @@ export function Services() {
           {services.map((s, i) => (
             <li key={s.title} className="flex flex-col gap-4 border-b border-line py-8 md:pr-8">
               <span className="t-label">{String(i + 1).padStart(2, '0')}</span>
-              <h3 className="t-h3">{s.title}</h3>
+              <h3 className="t-h3">{hyphenate(s.title)}</h3>
               <ul className="flex flex-col gap-2 text-muted">
                 {s.items.map((it) => (
                   <li key={it}>{it}</li>

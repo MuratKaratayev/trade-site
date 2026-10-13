@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { products } from '@/content/site';
 import { Icon } from '@/components/ui/Icon';
 import { Text } from '@/components/ui/Text';
+import { hyphenate } from '@/lib/hyphenate';
 
 type Params = { slug: string };
 
@@ -46,7 +47,7 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
         <header className="col-span-12 flex flex-col gap-6 lg:col-span-8">
           <Icon name={p.icon} className="text-accent-text" />
           <span className="t-label">Продукция</span>
-          <h1 className="t-display">{p.title}</h1>
+          <h1 className="t-h2">{hyphenate(p.title)}</h1>
           {p.description.map((d) => (
             <p key={d} className="t-body-l text-muted">
               <Text>{d}</Text>
@@ -61,8 +62,9 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
           {p.items.length > 0 ? (
             <ul className="border-t border-line">
               {p.items.map((it) => (
-                <li key={it} className="border-b border-line py-4">
-                  {it}
+                <li key={it.name} className="flex flex-col gap-1 border-b border-line py-4">
+                  <span className="font-medium">{it.name}</span>
+                  {it.note ? <span className="text-sm text-muted">{it.note}</span> : null}
                 </li>
               ))}
             </ul>

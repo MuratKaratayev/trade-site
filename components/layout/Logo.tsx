@@ -13,7 +13,7 @@ export function Logo() {
       className="inline-flex shrink-0 rounded px-[10px] py-[8px]"
       style={{ background: 'var(--logo-plate)' }}
     >
-      <Image src="/logo.svg" alt="TRADE-Инжиниринг" width={817} height={90} priority unoptimized className="h-auto w-[170px] md:w-[218px]" />
+      <Image src="/logo.svg" alt="TRADE-Инжиниринг" width={817} height={90} priority unoptimized className="h-auto w-[210px] md:w-[240px] xl:w-[280px]" />
     </Link>
   );
 }

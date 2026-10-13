@@ -22,7 +22,7 @@ export function Header() {
       <div className="container-site flex h-[72px] items-center gap-8 lg:h-24">
         <Logo />
         <nav aria-label="Основная навигация" className="ml-auto hidden lg:block">
-          <ul className="flex gap-7 text-[15px] font-medium">
+          <ul className="flex gap-5 text-[15px] font-medium xl:gap-7">
             {nav.map((i) => (
               <li key={i.href}>
                 <a href={i.href} className="hover:text-accent-text">

@@ -4,6 +4,7 @@ import { useActionState } from 'react';
 import { submitLead } from '@/app/actions/lead';
 import type { LeadState } from '@/lib/lead-schema';
 import { company } from '@/content/site';
+import { MapLink } from '@/components/ui/MapLink';
 
 const initial: LeadState = { status: 'idle' };
 
@@ -41,7 +42,11 @@ export function LeadForm() {
             </div>
             <div>
               <dt className="text-sm text-muted">Адрес</dt>
-              <dd>{company.address}</dd>
+              <dd>
+                <MapLink query={company.mapQuery} className="underline decoration-line underline-offset-4 hover:text-accent-text">
+                  {company.address}
+                </MapLink>
+              </dd>
             </div>
           </dl>
         </div>
