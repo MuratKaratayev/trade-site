@@ -15,6 +15,7 @@ function apply(mode: ThemeMode) {
   const root = document.documentElement;
   root.setAttribute('data-theme', resolved);
   root.setAttribute('data-theme-mode', mode);
+  (window as unknown as { __themeColor?: () => void }).__themeColor?.();
 }
 
 function readMode(): ThemeMode {
@@ -76,6 +77,7 @@ export function ThemeToggle({ className = '' }: { className?: string }) {
             aria-checked={checked}
             aria-label={o.label}
             title={o.label}
+            data-mode={o.mode}
             // Roving tabindex: в группу попадаем одним Tab, внутри — стрелками
             tabIndex={checked || (mode === null && o.mode === 'system') ? 0 : -1}
             onClick={() => choose(o.mode)}
@@ -88,7 +90,7 @@ export function ThemeToggle({ className = '' }: { className?: string }) {
               const group = e.currentTarget.parentElement;
               (group?.querySelectorAll<HTMLButtonElement>('button')[OPTIONS.indexOf(next)])?.focus();
             }}
-            className={`inline-flex size-10 items-center justify-center rounded-sm transition-colors ${
+            className={`theme-opt inline-flex size-10 items-center justify-center rounded-sm transition-colors ${
               checked ? 'bg-surface text-text' : 'text-muted hover:text-text'
             }`}
           >

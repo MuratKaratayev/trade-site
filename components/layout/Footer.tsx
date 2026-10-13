@@ -1,5 +1,6 @@
 import { company, nav } from '@/content/site';
 import { MapLink } from '@/components/ui/MapLink';
+import { CurrentYear } from '@/components/ui/CurrentYear';
 
 export function Footer() {
   const year = new Date().getFullYear();
@@ -43,8 +44,13 @@ export function Footer() {
           ))}
         </dl>
       </div>
-      <div className="container-site border-t border-line py-6 text-sm text-muted">
-        © {year} {company.legalName}
+      <div className="container-site flex flex-wrap justify-between gap-x-6 gap-y-2 border-t border-line py-6 text-sm text-muted">
+        <span>
+          © <CurrentYear buildYear={year} /> {company.legalName}
+        </span>
+        <a href="/privacy" className="hover:text-accent-text">
+          Политика обработки персональных данных
+        </a>
       </div>
     </footer>
   );

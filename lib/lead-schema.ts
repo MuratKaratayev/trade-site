@@ -14,8 +14,5 @@ export const leadSchema = z.object({
 
 export type LeadInput = z.infer<typeof leadSchema>;
 
-export type LeadState = {
-  status: 'idle' | 'error' | 'success' | 'not-configured';
-  message?: string;
-  fieldErrors?: Partial<Record<'name' | 'phone' | 'message' | 'consent', string>>;
-};
+export type { LeadValues, LeadState } from './lead-types';
+export { HONEYPOT_FIELD } from './lead-types';

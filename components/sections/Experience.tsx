@@ -41,9 +41,10 @@ export function Experience() {
         <ul className="grid grid-cols-2 gap-4 lg:grid-cols-4">
           {photos.map((ph) => (
             <li key={ph.src}>
+              {/* alt пустой: фото описывает видимая подпись figcaption */}
               <figure className="flex flex-col gap-3">
                 <div className="photo aspect-[4/5] rounded-card">
-                  <Image src={ph.src} alt={ph.caption} fill sizes="(min-width: 1024px) 25vw, 50vw" className="object-cover" />
+                  <Image src={ph.src} alt="" fill sizes="(min-width: 1024px) 25vw, 50vw" className="object-cover" />
                 </div>
                 <figcaption className="text-sm text-muted">{ph.caption}</figcaption>
               </figure>

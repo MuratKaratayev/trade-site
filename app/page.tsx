@@ -5,6 +5,7 @@ import { Services } from '@/components/sections/Services';
 import { Experience } from '@/components/sections/Experience';
 import { Certificates } from '@/components/sections/Certificates';
 import { LeadForm } from '@/components/sections/LeadForm';
+import { company } from '@/content/site';
 
 export default function HomePage() {
   return (
@@ -15,7 +16,7 @@ export default function HomePage() {
       <Services />
       <Experience />
       <Certificates />
-      <LeadForm />
+      <LeadForm contacts={{ phones: company.phones, email: company.email, address: company.address, mapQuery: company.mapQuery }} />
     </>
   );
 }

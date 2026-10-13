@@ -15,7 +15,36 @@ const legacy: { source: string; destination: string }[] = [
   { source: '/produkcziya/analiticheskie-priboryi-zhidkix-sredstv/:path*', destination: '/#products' },
 ];
 
+// Заголовки безопасности. CSP допускает inline-скрипты: Next.js и скрипт темы встраивают их в HTML,
+// а nonce сделал бы все страницы динамическими. vercel.live — тулбар комментариев на превью Vercel.
+const csp = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline' https://vercel.live",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob: https://vercel.live https://vercel.com",
+  "font-src 'self' https://vercel.live",
+  "connect-src 'self' https://vercel.live wss://ws-us3.pusher.com",
+  "frame-src https://vercel.live",
+  "frame-ancestors 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "object-src 'none'",
+].join('; ');
+
+const securityHeaders = [
+  { key: 'Content-Security-Policy', value: csp },
+  { key: 'Strict-Transport-Security', value: 'max-age=63072000' },
+  { key: 'X-Frame-Options', value: 'DENY' },
+  { key: 'X-Content-Type-Options', value: 'nosniff' },
+  { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+  { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(), payment=(), usb=()' },
+];
+
 const nextConfig: NextConfig = {
+  poweredByHeader: false,
+  async headers() {
+    return [{ source: '/:path*', headers: securityHeaders }];
+  },
   // Встроенная нормализация слэша дала бы цепочку 308 → 301 для старых адресов вида /uslugi/.
   // Отключаем её и делаем то же правилом ниже, после старых адресов.
   skipTrailingSlashRedirect: true,

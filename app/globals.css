@@ -280,6 +280,15 @@
     pointer-events: none;
   }
 
+  /* Переключатель темы: выбранная кнопка подсвечена сразу по data-theme-mode (ставит inline-скрипт),
+     ещё до гидратации React */
+  html[data-theme-mode='system'] .theme-opt[data-mode='system'],
+  html[data-theme-mode='light'] .theme-opt[data-mode='light'],
+  html[data-theme-mode='dark'] .theme-opt[data-mode='dark'] {
+    background: var(--surface);
+    color: var(--text);
+  }
+
   /* Видимый плейсхолдер недостающих данных */
   .placeholder {
     display: inline;

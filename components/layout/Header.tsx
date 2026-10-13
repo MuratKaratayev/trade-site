@@ -1,12 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { company, nav } from '@/content/site';
 import { Icon } from '@/components/ui/Icon';
 import { Logo } from './Logo';
 import { ThemeToggle } from './ThemeToggle';
 
-export function Header() {
+type Props = { nav: { label: string; href: string }[]; phone: { label: string; href: string }; email: string };
+
+// Клиентский компонент получает данные пропсами — модуль content/site не попадает в клиентский бандл.
+export function Header({ nav, phone, email }: Props) {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -33,8 +35,8 @@ export function Header() {
           </ul>
         </nav>
         <div className="ml-auto flex items-center gap-3 lg:ml-0">
-          <a href={company.phones[0].href} className="hidden font-semibold whitespace-nowrap xl:inline">
-            {company.phones[0].label}
+          <a href={phone.href} className="hidden font-semibold whitespace-nowrap xl:inline">
+            {phone.label}
           </a>
           <div className="hidden sm:block">
             <ThemeToggle />
@@ -66,11 +68,11 @@ export function Header() {
             <span className="text-muted">Тема</span>
             <ThemeToggle />
           </div>
-          <a href={company.phones[0].href} className="mt-6 block text-lg font-semibold">
-            {company.phones[0].label}
+          <a href={phone.href} className="mt-6 block text-lg font-semibold">
+            {phone.label}
           </a>
-          <a href={`mailto:${company.email}`} className="mt-2 block text-muted">
-            {company.email}
+          <a href={`mailto:${email}`} className="mt-2 block text-muted">
+            {email}
           </a>
         </nav>
       </div>

@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { products } from '@/content/site';
+import { company, isPlaceholder, products } from '@/content/site';
+import { ogBase, twitterBase } from '@/lib/seo';
 import { Icon } from '@/components/ui/Icon';
 import { Text } from '@/components/ui/Text';
 import { hyphenate } from '@/lib/hyphenate';
@@ -18,8 +19,15 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   const { slug } = await params;
   const p = products.find((x) => x.slug === slug);
   if (!p) return {};
-  const description = p.summary.startsWith('[') ? `${p.title} — TRADE-Инжиниринг, Павлодар.` : p.summary;
-  return { title: p.title, description, alternates: { canonical: `/products/${p.slug}` }, openGraph: { title: p.title, description } };
+  const description = isPlaceholder(p.summary) ? `${p.title} — TRADE-Инжиниринг, Павлодар.` : p.summary;
+  const url = `/products/${p.slug}`;
+  return {
+    title: p.title,
+    description,
+    alternates: { canonical: url },
+    openGraph: { ...ogBase, title: p.title, description, url },
+    twitter: { ...twitterBase, title: p.title, description },
+  };
 }
 
 export default async function ProductPage({ params }: { params: Promise<Params> }) {
@@ -27,8 +35,20 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
   const p = products.find((x) => x.slug === slug);
   if (!p) notFound();
 
+  const others = products.filter((x) => x.slug !== p.slug);
+  const breadcrumbs = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Главная', item: company.url },
+      { '@type': 'ListItem', position: 2, name: 'Продукция', item: `${company.url}/#products` },
+      { '@type': 'ListItem', position: 3, name: p.title, item: `${company.url}/products/${p.slug}` },
+    ],
+  };
+
   return (
     <article className="section">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbs) }} />
       <div className="container-site grid grid-cols-12 gap-x-6 gap-y-12">
         <nav aria-label="Хлебные крошки" className="col-span-12 text-sm text-muted">
           <Link href="/" className="hover:text-accent-text">
@@ -82,6 +102,21 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
             Оставить заявку
           </Link>
         </aside>
+        <nav aria-labelledby="others-title" className="col-span-12 flex flex-col gap-6 border-t border-line pt-12">
+          <h2 id="others-title" className="t-h3">
+            Другие разделы
+          </h2>
+          <ul className="grid gap-4 sm:grid-cols-3">
+            {others.map((o) => (
+              <li key={o.slug}>
+                <Link href={`/products/${o.slug}`} className="flex h-full items-center gap-4 rounded-card border border-line p-4 hover:border-text">
+                  <Icon name={o.icon} size={32} className="shrink-0 text-accent-text" />
+                  <span className="font-medium">{o.title}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
       </div>
     </article>
   );

@@ -4,7 +4,8 @@ import { useEffect, useState, type ReactNode } from 'react';
 
 /**
  * Ссылка на адрес, открывающая карты по умолчанию на устройстве посетителя:
- * - iPhone / iPad / Mac → Apple Maps (maps.apple.com открывает приложение «Карты»);
+ * - iPhone / iPad → Apple Maps (maps.apple.com открывает приложение «Карты» из любого браузера);
+ * - Mac в Safari → Apple Maps; Mac в Chrome/Firefox → Google Maps (там maps.apple.com откроется лишь веб-версией);
  * - Android → geo:-URI (система предлагает приложение карт по умолчанию);
  * - остальное (Windows, Linux) → Google Maps в браузере.
  * На сервере и без JS — ссылка на Google Maps, она работает везде.
@@ -16,8 +17,10 @@ export function MapLink({ query, children, className = '' }: { query: string; ch
 
   useEffect(() => {
     const ua = navigator.userAgent;
-    const isIPadOS = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
-    if (/iPhone|iPad|iPod|Macintosh/.test(ua) || isIPadOS) setHref(`https://maps.apple.com/?q=${q}`);
+    // iPadOS представляется как Mac, отличаем по сенсорному экрану
+    const isIOS = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+    const isMacSafari = /Macintosh/.test(ua) && /Safari\//.test(ua) && !/Chrome|Chromium|CriOS|Edg|Firefox|FxiOS|OPR/.test(ua);
+    if (isIOS || isMacSafari) setHref(`https://maps.apple.com/?q=${q}`);
     else if (/Android/.test(ua)) setHref(`geo:0,0?q=${q}`);
   }, [q]);
 
