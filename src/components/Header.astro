@@ -1,0 +1,221 @@
+---
+import Logo from './Logo.astro';
+import ThemeToggle from './ThemeToggle.astro';
+import { nav, company } from '../data/site';
+
+const path = Astro.url.pathname;
+---
+<header class="header" data-header>
+  <div class="wrap header__row">
+    <Logo />
+    <nav class="header__nav" aria-label="Основная навигация">
+      <ul>
+        {
+          nav.map((item) => (
+            <li>
+              <a href={item.href} aria-current={item.href === path ? 'page' : undefined}>
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+    <div class="header__tools">
+      <a class="header__phone" href={company.phones[0].href}>{company.phones[0].label}</a>
+      <div class="header__theme"><ThemeToggle /></div>
+      <button class="header__burger" type="button" aria-expanded="false" aria-controls="mobile-menu" data-burger>
+        <span class="visually-hidden">Меню</span>
+        <i></i><i></i>
+      </button>
+    </div>
+  </div>
+  <div class="mobile-menu" id="mobile-menu" hidden data-menu>
+    <nav class="wrap" aria-label="Мобильная навигация">
+      <ul>
+        {nav.map((item) => <li><a href={item.href}>{item.label}</a></li>)}
+      </ul>
+      <div class="mobile-menu__theme">
+        <span>Тема</span>
+        <ThemeToggle />
+      </div>
+      <a class="mobile-menu__phone" href={company.phones[0].href}>{company.phones[0].label}</a>
+      <a href={`mailto:${company.email}`}>{company.email}</a>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: var(--header-bg);
+    backdrop-filter: saturate(1.4) blur(14px);
+    -webkit-backdrop-filter: saturate(1.4) blur(14px);
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.3s, background-color 0.3s;
+  }
+  .header.is-scrolled {
+    border-bottom-color: var(--line);
+  }
+  .header__row {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    height: 72px;
+  }
+  .header__nav {
+    margin-inline: auto;
+  }
+  .header__nav ul {
+    display: flex;
+    gap: 4px;
+  }
+  .header__nav a {
+    display: block;
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-size: 15px;
+    color: var(--muted);
+    transition: color 0.2s, background-color 0.2s;
+  }
+  .header__nav a:hover,
+  .header__nav a[aria-current='page'] {
+    color: var(--text);
+    background: var(--surface-2);
+  }
+  .header__tools {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .header__phone {
+    font-family: var(--mono);
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .header__phone:hover {
+    color: var(--accent);
+  }
+  .header__burger {
+    display: none;
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+    position: relative;
+  }
+  .header__burger i {
+    position: absolute;
+    left: 13px;
+    right: 13px;
+    height: 1.6px;
+    background: currentColor;
+    transition: transform 0.3s var(--ease);
+  }
+  .header__burger i:first-of-type {
+    top: 17px;
+  }
+  .header__burger i:last-of-type {
+    top: 25px;
+  }
+  .header__burger[aria-expanded='true'] i:first-of-type {
+    transform: translateY(4px) rotate(45deg);
+  }
+  .header__burger[aria-expanded='true'] i:last-of-type {
+    transform: translateY(-4px) rotate(-45deg);
+  }
+  .mobile-menu {
+    border-top: 1px solid var(--line);
+    padding-block: 16px 28px;
+  }
+  .mobile-menu ul {
+    display: grid;
+    margin-bottom: 20px;
+  }
+  .mobile-menu li a {
+    display: block;
+    padding: 12px 0;
+    font-size: 24px;
+    font-weight: 600;
+    border-bottom: 1px solid var(--line);
+  }
+  .mobile-menu > nav > a {
+    display: block;
+    color: var(--muted);
+    padding-block: 4px;
+  }
+  .mobile-menu__theme {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    color: var(--muted);
+  }
+  .mobile-menu__phone {
+    font-family: var(--mono);
+    color: var(--text) !important;
+  }
+
+  @media (max-width: 1080px) {
+    .header__phone {
+      display: none;
+    }
+  }
+  @media (max-width: 900px) {
+    .header__nav {
+      display: none;
+    }
+    .header__tools {
+      margin-left: auto;
+      gap: 10px;
+    }
+    .header__burger {
+      display: block;
+    }
+  }
+  @media (max-width: 560px) {
+    .header__theme {
+      display: none;
+    }
+    .mobile-menu__theme {
+      display: flex;
+    }
+  }
+  @media (max-width: 380px) {
+    .header__row {
+      gap: 12px;
+    }
+    .header :global(.logo span) {
+      font-size: 16px;
+    }
+  }
+</style>
+
+<script>
+  const header = document.querySelector<HTMLElement>('[data-header]');
+  const burger = document.querySelector<HTMLButtonElement>('[data-burger]');
+  const menu = document.querySelector<HTMLElement>('[data-menu]');
+
+  const onScroll = () => header?.classList.toggle('is-scrolled', window.scrollY > 8);
+  onScroll();
+  window.addEventListener('scroll', onScroll, { passive: true });
+
+  const setOpen = (open: boolean) => {
+    if (!burger || !menu) return;
+    burger.setAttribute('aria-expanded', String(open));
+    menu.hidden = !open;
+  };
+  burger?.addEventListener('click', () => setOpen(burger.getAttribute('aria-expanded') !== 'true'));
+  menu?.addEventListener('click', (e) => {
+    if ((e.target as HTMLElement).closest('a')) setOpen(false);
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') setOpen(false);
+  });
+</script>

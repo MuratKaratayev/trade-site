@@ -1,0 +1,79 @@
+---
+import Logo from './Logo.astro';
+import { company, nav } from '../data/site';
+const year = new Date().getFullYear();
+---
+<footer class="footer">
+  <div class="wrap footer__grid">
+    <div class="footer__brand">
+      <Logo />
+      <p>Комплексные решения АСУ ТП для энергетики, металлургии и нефтехимии.</p>
+    </div>
+    <nav aria-label="Разделы сайта">
+      <ul>{nav.map((i) => <li><a href={i.href}>{i.label}</a></li>)}</ul>
+    </nav>
+    <div class="footer__contacts">
+      {company.phones.map((p) => <a class="mono" href={p.href}>{p.label}</a>)}
+      <a href={`mailto:${company.email}`}>{company.email}</a>
+      <p>{company.address}</p>
+    </div>
+  </div>
+  <div class="wrap footer__bottom">
+    <span>© {year} {company.legal}</span>
+    <span class="mono">БИН {company.bin}</span>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    border-top: 1px solid var(--line);
+    padding-top: 64px;
+    font-size: 15px;
+  }
+  .footer__grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1.2fr;
+    gap: 40px;
+    padding-bottom: 48px;
+  }
+  .footer__brand p {
+    margin-top: 16px;
+    max-width: 320px;
+    color: var(--muted);
+  }
+  .footer ul {
+    display: grid;
+    gap: 8px;
+  }
+  .footer a:hover {
+    color: var(--accent);
+  }
+  .footer__contacts {
+    display: grid;
+    gap: 6px;
+    align-content: start;
+  }
+  .footer__contacts p {
+    color: var(--muted);
+    margin-top: 8px;
+  }
+  .mono {
+    font-family: var(--mono);
+    font-size: 14px;
+  }
+  .footer__bottom {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 12px;
+    padding-block: 24px 32px;
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 14px;
+  }
+  @media (max-width: 760px) {
+    .footer__grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

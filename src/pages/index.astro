@@ -1,0 +1,808 @@
+---
+import Base from '../layouts/Base.astro';
+import HeroScheme from '../components/HeroScheme.astro';
+import GeoMap from '../components/GeoMap.astro';
+import Contact from '../components/Contact.astro';
+import { services, products, projects, sites, clients, platforms, industries } from '../data/site';
+
+const headline = 'Автоматизация технологических процессов под ключ';
+
+// Все цифры считаются из контента старого сайта, а не придуманы
+const facts = [
+  { n: services.length, label: 'этапов полного цикла — от обследования до сервиса' },
+  { n: sites.length, label: 'городов Казахстана с нашими объектами' },
+  { n: platforms.length, label: 'платформы: TREI, Emerson, Siemens, GE' },
+  { n: industries.length, label: 'отрасли: энергетика, металлургия, нефтехимия' },
+];
+
+const systems = [
+  'Котлоагрегаты',
+  'Турбоагрегаты',
+  'Котельные',
+  'Химводоподготовка',
+  'Топливно-транспортные цеха',
+  'Насосные станции',
+  'Тепловые пункты',
+  'Диспетчерские пункты',
+];
+
+const arrow = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>`;
+---
+<Base
+  title="TRADE-Инжиниринг — АСУ ТП под ключ, Павлодар"
+  description="Проектирование, изготовление шкафов автоматики, поставка КИПиА, монтаж, пусконаладка и сервис систем АСУ ТП для энергетики, металлургии и нефтехимии Казахстана."
+>
+  <!-- ── Hero ───────────────────────────────────────── -->
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="wrap hero__grid">
+      <div class="hero__text">
+        <span class="eyebrow hero__in" style="--i:0">ТОО «TRADE-Инжиниринг» · Павлодар</span>
+        <h1 id="hero-title" aria-label={headline}>
+          {
+            headline.split(' ').map((w, i) => (
+              <span class="word" aria-hidden="true">
+                <span style={`--i:${i + 1}`}>{w}</span>
+              </span>
+            ))
+          }
+        </h1>
+        <p class="hero__lead hero__in" style="--i:6">
+          Проектируем, собираем и&nbsp;запускаем системы управления для энергетики, металлургии и&nbsp;нефтехимии — от&nbsp;обследования объекта до&nbsp;сервиса.
+        </p>
+        <div class="hero__cta hero__in" style="--i:7">
+          <a class="btn btn--primary" href="#contact">Обсудить проект <Fragment set:html={arrow} /></a>
+          <a class="btn btn--ghost" href="#projects">Наши проекты</a>
+        </div>
+      </div>
+      <div class="hero__visual">
+        <HeroScheme />
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Цифры ──────────────────────────────────────── -->
+  <section class="facts" aria-label="Коротко о компании">
+    <div class="wrap facts__grid">
+      {
+        facts.map((f, i) => (
+          <div class="fact" data-reveal style={`--d:${i}`}>
+            <span class="fact__n" data-count={f.n}>{f.n}</span>
+            <span class="fact__label">{f.label}</span>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <!-- ── О компании ─────────────────────────────────── -->
+  <section class="section" id="about" aria-labelledby="about-title">
+    <div class="wrap about">
+      <div class="section-head" data-reveal>
+        <span class="eyebrow">О компании</span>
+        <h2 id="about-title">Инженерная компания полного цикла в&nbsp;промышленной автоматизации</h2>
+        <p>
+          Решения наших специалистов позволяют вести весь комплекс задач автоматизации предприятия на единой программно-технической платформе — с&nbsp;поэтапным вводом и&nbsp;модернизацией систем.
+        </p>
+      </div>
+      <div class="about__cols">
+        <div class="about__card" data-reveal style="--d:1">
+          <h3>Что автоматизируем</h3>
+          <ul class="list-check">
+            <li>Контроль и управление технологическим процессом</li>
+            <li>Противоаварийные защиты и блокировки</li>
+            <li>Пожарная сигнализация и пожаротушение</li>
+            <li>Системы жизнеобеспечения, технологический и коммерческий учёт</li>
+          </ul>
+        </div>
+        <div class="about__card" data-reveal style="--d:2">
+          <h3>Где есть опыт</h3>
+          <ul class="chips">{systems.map((s) => <li>{s}</li>)}</ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Полный цикл (линия заполняется при скролле) ── -->
+  <section class="section section--alt" aria-labelledby="cycle-title">
+    <div class="wrap cycle">
+      <div class="cycle__head">
+        <div class="section-head" data-reveal>
+          <span class="eyebrow">Услуги</span>
+          <h2 id="cycle-title">Один подрядчик на&nbsp;весь цикл</h2>
+          <p>Берём ответственность за систему целиком: не нужно стыковать проектировщика, поставщика и наладчиков.</p>
+        </div>
+        <a class="btn btn--ghost" href="/uslugi/" data-reveal style="--d:1">Подробнее об услугах <Fragment set:html={arrow} /></a>
+      </div>
+      <ol class="cycle__steps" data-progress>
+        <span class="cycle__rail" aria-hidden="true"><span class="cycle__fill"></span></span>
+        {
+          services.map((s, i) => (
+            <li class="step" data-step>
+              <span class="step__n">{String(i + 1).padStart(2, '0')}</span>
+              <div>
+                <h3>{s.title}</h3>
+                <p>{s.short}</p>
+              </div>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  <!-- ── Продукция ──────────────────────────────────── -->
+  <section class="section" id="products" aria-labelledby="products-title">
+    <div class="wrap">
+      <div class="section-head" data-reveal>
+        <span class="eyebrow">Продукция</span>
+        <h2 id="products-title">Оборудование для систем автоматизации</h2>
+      </div>
+      <ul class="products">
+        {
+          products.map((p, i) => (
+            <li class="product" data-reveal data-tilt style={`--d:${i}`}>
+              <div class="product__plate">
+                <img src={p.img} alt="" width="269" height="248" loading="lazy" />
+              </div>
+              <h3>{p.title}</h3>
+              <p>{p.note}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <!-- ── Проекты ────────────────────────────────────── -->
+  <section class="section section--alt" id="projects" aria-labelledby="projects-title">
+    <div class="wrap">
+      <div class="projects__head">
+        <div class="section-head" data-reveal>
+          <span class="eyebrow">Наш опыт</span>
+          <h2 id="projects-title">Реализованные проекты</h2>
+        </div>
+        <div class="projects__nav" data-reveal>
+          <button type="button" class="round" data-scroll="-1" aria-label="Предыдущие проекты">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6" /></svg>
+          </button>
+          <button type="button" class="round" data-scroll="1" aria-label="Следующие проекты">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" /></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+    <ul class="projects" data-rail data-reveal tabindex="0" aria-label="Проекты, прокручиваются горизонтально">
+      {
+        projects.map((p, i) => (
+          <li class="project">
+            <figure>
+              <div class="project__img">
+                <img src={p.img} alt={p.alt} loading="lazy" />
+              </div>
+              <figcaption>
+                <span class="project__meta">{p.client} · {p.city}</span>
+                <span class="project__title">{p.title}</span>
+              </figcaption>
+            </figure>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <!-- ── География ──────────────────────────────────── -->
+  <section class="section" aria-labelledby="geo-title">
+    <div class="wrap">
+      <div class="section-head" data-reveal>
+        <span class="eyebrow">География</span>
+        <h2 id="geo-title">Объекты по&nbsp;всему Казахстану</h2>
+        <p>Офис и производство — в&nbsp;Павлодаре. Работаем на&nbsp;объектах заказчиков по&nbsp;всей стране.</p>
+      </div>
+      <GeoMap />
+    </div>
+  </section>
+
+  <!-- ── Заказчики ──────────────────────────────────── -->
+  <section class="clients" aria-labelledby="clients-title">
+    <div class="wrap clients__head">
+      <h2 id="clients-title" class="eyebrow">Нам доверяют</h2>
+      <p class="clients__platforms">
+        Работаем на&nbsp;оборудовании {platforms.map((p, i) => <><b>{p}</b>{i < platforms.length - 1 ? ', ' : ''}</>)}
+      </p>
+    </div>
+    <div class="marquee" aria-label="Заказчики">
+      <ul class="marquee__track">
+        {clients.map((c) => <li>{c}</li>)}
+      </ul>
+      <ul class="marquee__track" aria-hidden="true">
+        {clients.map((c) => <li>{c}</li>)}
+      </ul>
+    </div>
+  </section>
+
+  <Contact />
+</Base>
+
+<style>
+  /* ── Hero ── */
+  .hero {
+    position: relative;
+    padding-block: clamp(40px, 7vw, 96px) clamp(48px, 7vw, 96px);
+    overflow: hidden;
+  }
+  .hero__grid {
+    display: grid;
+    grid-template-columns: 1.05fr 1fr;
+    gap: clamp(32px, 5vw, 72px);
+    align-items: center;
+  }
+  .hero__text {
+    display: grid;
+    gap: 28px;
+  }
+  h1 {
+    font-size: clamp(40px, 6vw, 78px);
+    line-height: 1.02;
+    letter-spacing: -0.035em;
+  }
+  .word {
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: top;
+    padding-bottom: 0.08em;
+    margin-right: 0.22em;
+  }
+  .word > span {
+    display: inline-block;
+    animation: word-up 0.9s var(--ease) both;
+    animation-delay: calc(var(--i) * 70ms);
+  }
+  .word:nth-child(n + 5) > span {
+    color: var(--accent);
+  }
+  .hero__in {
+    animation: fade-up 0.9s var(--ease) both;
+    animation-delay: calc(var(--i) * 70ms + 120ms);
+  }
+  .hero__lead {
+    font-size: clamp(18px, 1.7vw, 21px);
+    color: var(--muted);
+    max-width: 540px;
+  }
+  .hero__cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .hero__visual {
+    min-width: 0;
+  }
+  @keyframes word-up {
+    from {
+      transform: translateY(105%);
+    }
+    to {
+      transform: none;
+    }
+  }
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* ── Цифры ── */
+  .facts {
+    border-block: 1px solid var(--line);
+  }
+  .facts__grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .fact {
+    display: grid;
+    gap: 8px;
+    padding: 32px 24px 32px 0;
+  }
+  .fact + .fact {
+    padding-left: 24px;
+    border-left: 1px solid var(--line);
+  }
+  .fact__n {
+    font-family: var(--mono);
+    font-size: clamp(40px, 5vw, 64px);
+    font-weight: 500;
+    line-height: 1;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+  }
+  .fact__label {
+    color: var(--muted);
+    font-size: 15px;
+    max-width: 220px;
+  }
+
+  /* ── О компании ── */
+  .about__cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  .about__card {
+    padding: clamp(24px, 3vw, 40px);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+  .about__card h3 {
+    font-size: 22px;
+    margin-bottom: 20px;
+  }
+  .list-check {
+    display: grid;
+    gap: 12px;
+  }
+  .list-check li {
+    position: relative;
+    padding-left: 30px;
+  }
+  .list-check li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.45em;
+    width: 16px;
+    height: 9px;
+    border-left: 2px solid var(--accent);
+    border-bottom: 2px solid var(--accent);
+    transform: rotate(-45deg) scale(0.8);
+  }
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .chips li {
+    padding: 8px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--line-strong);
+    font-size: 15px;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+  }
+  .chips li:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-ink);
+  }
+
+  /* ── Полный цикл ── */
+  .cycle {
+    display: grid;
+    grid-template-columns: 1fr 1.1fr;
+    gap: clamp(32px, 6vw, 96px);
+    align-items: start;
+  }
+  .cycle__head {
+    position: sticky;
+    top: 120px;
+    display: grid;
+    justify-items: start;
+  }
+  .cycle__head .section-head {
+    margin-bottom: 32px;
+  }
+  .cycle__steps {
+    position: relative;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: clamp(28px, 4vw, 48px);
+    --progress: 0;
+  }
+  .cycle__rail {
+    position: absolute;
+    left: 27px;
+    top: 28px;
+    bottom: 28px;
+    width: 2px;
+    background: var(--line);
+  }
+  .cycle__fill {
+    position: absolute;
+    inset: 0;
+    background: var(--accent);
+    transform-origin: top;
+    transform: scaleY(var(--progress));
+  }
+  .step {
+    position: relative;
+    display: grid;
+    grid-template-columns: 56px 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+  .step__n {
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: 1.5px solid var(--line-strong);
+    background: var(--surface);
+    font-family: var(--mono);
+    font-size: 15px;
+    color: var(--muted);
+    transition: background-color 0.4s, color 0.4s, border-color 0.4s;
+  }
+  .step.is-on .step__n {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-ink);
+  }
+  .step h3 {
+    font-size: clamp(20px, 2vw, 24px);
+    margin: 12px 0 8px;
+  }
+  .step p {
+    color: var(--muted);
+  }
+
+  /* ── Продукция ── */
+  .products {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+  }
+  .product {
+    padding: 16px 16px 24px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+    transform-style: preserve-3d;
+    transition: box-shadow 0.3s, border-color 0.3s;
+  }
+  .product:hover {
+    box-shadow: var(--shadow);
+    border-color: var(--line-strong);
+  }
+  .js .product[data-reveal].is-in {
+    transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+    transition:
+      opacity 0.9s var(--ease),
+      transform 0.25s ease-out,
+      box-shadow 0.3s,
+      border-color 0.3s;
+  }
+  .product__plate {
+    aspect-ratio: 1.1;
+    display: grid;
+    place-items: center;
+    background: var(--plate);
+    border-radius: var(--radius-sm);
+    margin-bottom: 20px;
+  }
+  .product__plate img {
+    width: 70%;
+    height: auto;
+    transition: transform 0.5s var(--ease);
+  }
+  .product:hover .product__plate img {
+    transform: scale(1.06) translateY(-4px);
+  }
+  .product h3 {
+    font-size: 19px;
+    margin-bottom: 8px;
+  }
+  .product p {
+    font-size: 15px;
+    color: var(--muted);
+  }
+
+  /* ── Проекты ── */
+  .projects__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    gap: 24px;
+  }
+  .projects__nav {
+    display: flex;
+    gap: 8px;
+    margin-bottom: clamp(40px, 6vw, 72px);
+  }
+  .round {
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: 1px solid var(--line-strong);
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+  }
+  .round:hover {
+    background: var(--text);
+    color: var(--bg);
+    border-color: var(--text);
+  }
+  .round svg {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .projects {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: min(78vw, 440px);
+    gap: 20px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: max(var(--gutter), calc((100vw - var(--wrap)) / 2));
+    padding-inline: max(var(--gutter), calc((100vw - var(--wrap)) / 2));
+    padding-bottom: 16px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--line-strong) transparent;
+  }
+  .project {
+    scroll-snap-align: start;
+  }
+  .project figure {
+    margin: 0;
+  }
+  .project__img {
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    border-radius: var(--radius);
+    background: var(--surface-2);
+  }
+  .project__img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.9s var(--ease);
+  }
+  .project:hover .project__img img {
+    transform: scale(1.05);
+  }
+  figcaption {
+    display: grid;
+    gap: 6px;
+    padding-top: 16px;
+  }
+  .project__meta {
+    font-family: var(--mono);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+  }
+  .project__title {
+    font-size: 19px;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  /* ── Заказчики ── */
+  .clients {
+    padding-block: clamp(56px, 7vw, 96px);
+    border-top: 1px solid var(--line);
+    overflow: hidden;
+  }
+  .clients__head {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 12px 32px;
+    margin-bottom: 32px;
+  }
+  .clients__head h2 {
+    font-size: 13px;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+  }
+  .clients__platforms {
+    color: var(--muted);
+  }
+  .clients__platforms b {
+    color: var(--text);
+    font-weight: 600;
+  }
+  .marquee {
+    display: flex;
+    width: max-content;
+    mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  }
+  .marquee__track {
+    display: flex;
+    flex: none;
+    animation: marquee 48s linear infinite;
+  }
+  .marquee:hover .marquee__track {
+    animation-play-state: paused;
+  }
+  .marquee__track li {
+    font-size: clamp(24px, 3.2vw, 40px);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+    padding-inline: 28px;
+    display: flex;
+    align-items: center;
+    gap: 56px;
+    color: var(--muted);
+    transition: color 0.2s;
+  }
+  .marquee__track li:hover {
+    color: var(--text);
+  }
+  .marquee__track li::after {
+    content: '';
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    background: var(--accent);
+    flex: none;
+  }
+  @keyframes marquee {
+    to {
+      transform: translateX(-100%);
+    }
+  }
+
+  /* ── Адаптив ── */
+  @media (max-width: 1080px) {
+    .products {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (max-width: 960px) {
+    .hero__grid,
+    .cycle {
+      grid-template-columns: 1fr;
+    }
+    .hero__visual {
+      max-width: 620px;
+    }
+    .cycle__head {
+      position: static;
+    }
+    .facts__grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .fact:nth-child(3) {
+      padding-left: 0;
+      border-left: 0;
+    }
+    .fact:nth-child(n + 3) {
+      border-top: 1px solid var(--line);
+    }
+    .about__cols {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (max-width: 560px) {
+    .products {
+      grid-template-columns: 1fr;
+    }
+    .projects__nav {
+      display: none;
+    }
+    .fact {
+      padding-right: 12px;
+    }
+    .fact + .fact {
+      padding-left: 12px;
+    }
+    .fact:nth-child(3) {
+      padding-left: 0;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .marquee__track {
+      animation: none;
+    }
+    .marquee {
+      flex-wrap: wrap;
+      width: auto;
+    }
+    .marquee__track[aria-hidden='true'] {
+      display: none;
+    }
+    .marquee__track {
+      flex-wrap: wrap;
+    }
+  }
+</style>
+
+<script>
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Счётчики: от 0 до значения, когда блок попадает в экран
+  const counters = document.querySelectorAll<HTMLElement>('[data-count]');
+  if (!reduce) {
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (!e.isIntersecting) continue;
+          const el = e.target as HTMLElement;
+          const to = Number(el.dataset.count);
+          const t0 = performance.now();
+          const dur = 1200;
+          const step = (t: number) => {
+            const k = Math.min(1, (t - t0) / dur);
+            el.textContent = String(Math.round(to * (1 - Math.pow(1 - k, 3))));
+            if (k < 1) requestAnimationFrame(step);
+          };
+          requestAnimationFrame(step);
+          io.unobserve(el);
+        }
+      },
+      { threshold: 0.6 },
+    );
+    counters.forEach((el) => {
+      el.textContent = '0';
+      io.observe(el);
+    });
+  }
+
+  // Полный цикл: линия прогресса заполняется по мере прокрутки, шаги «включаются»
+  const list = document.querySelector<HTMLElement>('[data-progress]');
+  const steps = [...document.querySelectorAll<HTMLElement>('[data-step]')];
+  if (list) {
+    let raf = 0;
+    const update = () => {
+      raf = 0;
+      const r = list.getBoundingClientRect();
+      const line = window.innerHeight * 0.6; // «линия чтения» на 60% высоты экрана
+      const p = Math.min(1, Math.max(0, (line - r.top) / r.height));
+      list.style.setProperty('--progress', String(p));
+      steps.forEach((s) => s.classList.toggle('is-on', s.getBoundingClientRect().top < line));
+    };
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(update);
+    };
+    update();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+  }
+
+  // Наклон карточек продукции за курсором (только мышь)
+  if (!reduce && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    document.querySelectorAll<HTMLElement>('[data-tilt]').forEach((card) => {
+      card.addEventListener('pointermove', (e) => {
+        const r = card.getBoundingClientRect();
+        const x = (e.clientX - r.left) / r.width - 0.5;
+        const y = (e.clientY - r.top) / r.height - 0.5;
+        card.style.setProperty('--ry', `${x * 8}deg`);
+        card.style.setProperty('--rx', `${-y * 8}deg`);
+      });
+      card.addEventListener('pointerleave', () => {
+        card.style.setProperty('--ry', '0deg');
+        card.style.setProperty('--rx', '0deg');
+      });
+    });
+  }
+
+  // Кнопки прокрутки ленты проектов
+  const rail = document.querySelector<HTMLElement>('[data-rail]');
+  document.querySelectorAll<HTMLButtonElement>('[data-scroll]').forEach((b) => {
+    b.addEventListener('click', () => {
+      if (!rail) return;
+      const card = rail.querySelector<HTMLElement>('li');
+      const w = card ? card.offsetWidth + 20 : 400;
+      rail.scrollBy({ left: Number(b.dataset.scroll) * w, behavior: reduce ? 'auto' : 'smooth' });
+    });
+  });
+</script>
