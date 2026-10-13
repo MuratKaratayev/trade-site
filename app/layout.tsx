@@ -27,8 +27,9 @@ export const viewport: Viewport = {
   ],
 };
 
-// Тема до первой отрисовки: сохранённый выбор → prefers-color-scheme → тёмная.
-const themeScript = `(function(){var d=document.documentElement,t;try{t=localStorage.getItem('theme')}catch(e){}if(t!=='light'&&t!=='dark'){t=window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'}d.setAttribute('data-theme',t)})()`;
+// Тема до первой отрисовки (без мигания). Режим: сохранённый 'light' | 'dark', иначе «как в системе».
+// data-theme — фактическая тема (на неё завязаны токены), data-theme-mode — выбранный режим.
+const themeScript = `(function(){var d=document.documentElement,m,t;try{m=localStorage.getItem('theme')}catch(e){}if(m!=='light'&&m!=='dark')m='system';t=m==='system'?(window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'):m;d.setAttribute('data-theme',t);d.setAttribute('data-theme-mode',m)})()`;
 
 const orgJsonLd = {
   '@context': 'https://schema.org',
@@ -47,7 +48,7 @@ const orgJsonLd = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ru" data-theme="dark" suppressHydrationWarning className={`${unbounded.variable} ${onest.variable}`}>
+    <html lang="ru" data-theme="dark" data-theme-mode="system" suppressHydrationWarning className={`${unbounded.variable} ${onest.variable}`}>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }} />

@@ -36,7 +36,9 @@ export function Header() {
           <a href={company.phones[0].href} className="hidden font-semibold whitespace-nowrap xl:inline">
             {company.phones[0].label}
           </a>
-          <ThemeToggle />
+          <div className="hidden sm:block">
+            <ThemeToggle />
+          </div>
           <button
             type="button"
             className="inline-flex size-12 items-center justify-center rounded border border-line lg:hidden"
@@ -60,6 +62,10 @@ export function Header() {
               </li>
             ))}
           </ul>
+          <div className="mt-6 flex items-center justify-between sm:hidden">
+            <span className="text-muted">Тема</span>
+            <ThemeToggle />
+          </div>
           <a href={company.phones[0].href} className="mt-6 block text-lg font-semibold">
             {company.phones[0].label}
           </a>
