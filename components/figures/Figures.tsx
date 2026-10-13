@@ -3,7 +3,9 @@
 import { amplitude, C, faces, hull, iso, pts, pushBox, type Grid, type Hit, type Solid } from './iso';
 import { FigureSvg } from './FigureSvg';
 import { LazyFigure } from './LazyFigure';
+import { useRef } from 'react';
 import { useWave } from './useWave';
+import { useScrollWave } from './useScrollWave';
 
 type FigureProps = { intensity?: number; className?: string };
 
@@ -12,8 +14,16 @@ const N = 6;
 const fieldDistance = (p: number, q: number) =>
   Math.max(Math.abs(Math.floor(p / N) - Math.floor(q / N)), Math.abs((p % N) - (q % N)));
 
+// Прокрутка ведёт волну по диагонали поля: (0,0) → (5,5)
+const fieldPick = (t: number) => {
+  const k = Math.min(N - 1, Math.floor(t * N));
+  return k * N + k;
+};
+
 function KipField({ intensity = 0.6 }: FigureProps) {
   const { values, activate } = useWave(N * N, fieldDistance);
+  const ref = useRef<SVGSVGElement>(null);
+  useScrollWave(ref, fieldPick, activate);
   const m = amplitude(intensity);
   const g: Grid = { s: 26, ox: 229, oy: 150 };
   const solids: Solid[] = [];
@@ -33,14 +43,19 @@ function KipField({ intensity = 0.6 }: FigureProps) {
   for (let a = 0; a < N; a++)
     for (let b = 0; b < N; b++) hits.push({ pts: hull(a, b, 0, 1, 1, 0.45, g), index: a * N + b });
 
-  return <FigureSvg label="Поле КИП: столбики датчиков поднимаются вокруг курсора" solids={solids} hits={hits} onActivate={activate} />;
+  return <FigureSvg svgRef={ref} label="Поле КИП: столбики датчиков поднимаются вокруг курсора" solids={solids} hits={hits} onActivate={activate} />;
 }
 
 // ── FIG 02 · DIN-рейка: 8 модулей контроллера ────────────────────────
 const linear = (p: number, q: number) => Math.abs(p - q);
 
+// Прокрутка ведёт волну по модулям слева направо
+const railPick = (t: number) => Math.min(7, Math.floor(t * 8));
+
 function DinRail({ intensity = 0.6 }: FigureProps) {
   const { values, activate } = useWave(8, linear);
+  const ref = useRef<SVGSVGElement>(null);
+  useScrollWave(ref, railPick, activate);
   const m = amplitude(intensity);
   const g: Grid = { s: 24, ox: 160, oy: 200 };
   const solids: Solid[] = [];
@@ -72,12 +87,17 @@ function DinRail({ intensity = 0.6 }: FigureProps) {
     hits.push({ pts: hull(i * 1.0 + 0.07, 0, 0, 0.86, 1.3, 3.4, g), index: i });
   }
 
-  return <FigureSvg label="DIN-рейка: модуль контроллера под курсором поднимается, индикатор загорается" solids={solids} hits={hits} onActivate={activate} />;
+  return <FigureSvg svgRef={ref} label="DIN-рейка: модуль контроллера под курсором поднимается, индикатор загорается" solids={solids} hits={hits} onActivate={activate} />;
 }
 
 // ── FIG 03 · Стойка: открытая стойка с 6 полками ─────────────────────
+// Прокрутка ведёт волну по полкам снизу вверх (страница едет вверх — волна поднимается)
+const rackPick = (t: number) => Math.min(5, Math.floor(t * 6));
+
 function Rack({ intensity = 0.6 }: FigureProps) {
   const { values, activate } = useWave(6, linear);
+  const ref = useRef<SVGSVGElement>(null);
+  useScrollWave(ref, rackPick, activate);
   const m = amplitude(intensity);
   const g: Grid = { s: 38, ox: 250, oy: 290 };
   const solids: Solid[] = [];
@@ -98,7 +118,7 @@ function Rack({ intensity = 0.6 }: FigureProps) {
   pushBox(solids, faces(-0.05, -0.05, 4.45, 2.3, 1.75, 0.1, g), C.face, C.dim);
   hits.reverse();
 
-  return <FigureSvg label="Стойка: полки выдвигаются волной от курсора" solids={solids} hits={hits} onActivate={activate} />;
+  return <FigureSvg svgRef={ref} label="Стойка: полки выдвигаются волной от курсора" solids={solids} hits={hits} onActivate={activate} />;
 }
 
 // Публичные компоненты: ленивое монтирование + пропсы

@@ -1,6 +1,6 @@
 'use client';
 
-import type { PointerEvent } from 'react';
+import type { PointerEvent, Ref } from 'react';
 import { VIEWBOX, type Hit, type Solid } from './iso';
 
 type Props = {
@@ -8,28 +8,28 @@ type Props = {
   solids: Solid[];
   hits: Hit[];
   onActivate: (index: number | null) => void;
+  svgRef?: Ref<SVGSVGElement>;
 };
 
 /**
  * Рисует грани (solids) и поверх — невидимые статичные зоны (hits).
  * События висят только на статичных зонах, не на движущихся гранях — иначе дребезг.
- * Мышь/перо: наведение. Тач: касание (повторное касание фона — сброс).
+ * Мышь/перо: наведение. На тач-экранах касания игнорируются — там волной управляет прокрутка
+ * (useScrollWave), иначе фигура дёргается от случайных касаний при листании.
  */
-export function FigureSvg({ label, solids, hits, onActivate }: Props) {
+export function FigureSvg({ label, solids, hits, onActivate, svgRef }: Props) {
   const isTouch = (e: PointerEvent) => e.pointerType === 'touch';
 
   return (
     <svg
+      ref={svgRef}
       viewBox={`0 0 ${VIEWBOX.w} ${VIEWBOX.h}`}
       role="img"
       aria-label={label}
       className="block h-auto w-full select-none"
-      style={{ strokeLinejoin: 'round', touchAction: 'manipulation' }}
+      style={{ strokeLinejoin: 'round' }}
       onPointerLeave={(e) => {
         if (!isTouch(e)) onActivate(null);
-      }}
-      onPointerDown={(e) => {
-        if (isTouch(e) && e.target === e.currentTarget) onActivate(null);
       }}
     >
       <g pointerEvents="none">
@@ -52,9 +52,6 @@ export function FigureSvg({ label, solids, hits, onActivate }: Props) {
           stroke="none"
           onPointerEnter={(e) => {
             if (!isTouch(e)) onActivate(h.index);
-          }}
-          onPointerDown={(e) => {
-            if (isTouch(e)) onActivate(h.index);
           }}
         />
       ))}
