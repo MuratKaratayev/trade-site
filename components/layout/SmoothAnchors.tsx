@@ -7,7 +7,9 @@ import { EASE } from '@/components/figures/iso';
 /**
  * Плавная прокрутка к якорям (#about, /#products …) — медленнее встроенной в браузер,
  * с фирменной кривой брендбука. Со страницы продукции ссылка «/#раздел» открывает главную
- * без перезагрузки и затем плавно доезжает до раздела. prefers-reduced-motion — без анимации.
+ * без перезагрузки и затем плавно доезжает до раздела. Ссылка «/» (логотип) ведёт на главную
+ * в самый верх: на главной — плавно наверх, с других страниц — переход и старт сверху.
+ * prefers-reduced-motion — без анимации.
  */
 const reduced = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -17,25 +19,15 @@ function cancelScroll() {
   raf = 0;
 }
 
-function scrollToHash(hash: string) {
-  const id = decodeURIComponent(hash.replace(/^#/, ''));
-  const el = id ? document.getElementById(id) : null;
-  if (!el) return;
-  const header = document.querySelector('header');
-  const offset = header ? header.getBoundingClientRect().height : 0;
+/** Плавная прокрутка к позиции to с фирменной кривой; длительность растёт с расстоянием: 0,9–1,6 с */
+function animateScroll(to: number, onDone?: () => void) {
   const from = window.scrollY;
-  const to = Math.max(0, el.getBoundingClientRect().top + window.scrollY - offset);
-  const focusTarget = () => {
-    if (!el.hasAttribute('tabindex')) el.setAttribute('tabindex', '-1');
-    el.focus({ preventScroll: true });
-  };
   cancelScroll();
   if (reduced() || Math.abs(to - from) < 2) {
     window.scrollTo({ top: to, behavior: 'instant' });
-    focusTarget();
+    onDone?.();
     return;
   }
-  // Длительность растёт с расстоянием: 0,9–1,6 с
   const duration = Math.min(1600, Math.max(900, 500 + Math.abs(to - from) * 0.4));
   const start = performance.now();
   const step = (now: number) => {
@@ -44,15 +36,29 @@ function scrollToHash(hash: string) {
     if (p < 1) raf = requestAnimationFrame(step);
     else {
       raf = 0;
-      focusTarget();
+      onDone?.();
     }
   };
   raf = requestAnimationFrame(step);
 }
 
+function scrollToHash(hash: string) {
+  const id = decodeURIComponent(hash.replace(/^#/, ''));
+  const el = id ? document.getElementById(id) : null;
+  if (!el) return;
+  const header = document.querySelector('header');
+  const offset = header ? header.getBoundingClientRect().height : 0;
+  const to = Math.max(0, el.getBoundingClientRect().top + window.scrollY - offset);
+  animateScroll(to, () => {
+    if (!el.hasAttribute('tabindex')) el.setAttribute('tabindex', '-1');
+    el.focus({ preventScroll: true });
+  });
+}
+
 export function SmoothAnchors() {
   const router = useRouter();
   const pathname = usePathname();
+  // '#раздел' — доехать до раздела после перехода; 'top' — начать новую страницу с самого верха
   const pending = useRef<string | null>(null);
 
   useEffect(() => {
@@ -61,6 +67,18 @@ export function SmoothAnchors() {
       const a = (e.target as HTMLElement).closest<HTMLAnchorElement>('a[href]');
       if (!a || a.target === '_blank') return;
       const href = a.getAttribute('href') ?? '';
+      if (href === '/') {
+        e.preventDefault();
+        if (window.location.pathname === '/') {
+          // Уже на главной: убираем якорь из адреса и плавно едем в самый верх
+          if (window.location.hash) window.history.pushState(null, '', '/');
+          animateScroll(0);
+        } else {
+          pending.current = 'top';
+          router.push('/', { scroll: false });
+        }
+        return;
+      }
       const m = href.match(/^(\/[^#]*)?(#.+)$/);
       if (!m) return;
       const path = m[1] || window.location.pathname;
@@ -77,11 +95,13 @@ export function SmoothAnchors() {
     };
     // Пользователь сам крутит колесо или палец — не воюем с ним
     const interrupt = () => cancelScroll();
-    document.addEventListener('click', onClick);
+    // Фаза перехвата: срабатываем раньше next/link (логотип — <Link href="/">), иначе он сам
+    // перейдёт на главную и прыгнет наверх мгновенно
+    document.addEventListener('click', onClick, true);
     window.addEventListener('wheel', interrupt, { passive: true });
     window.addEventListener('touchstart', interrupt, { passive: true });
     return () => {
-      document.removeEventListener('click', onClick);
+      document.removeEventListener('click', onClick, true);
       window.removeEventListener('wheel', interrupt);
       window.removeEventListener('touchstart', interrupt);
     };
@@ -92,7 +112,9 @@ export function SmoothAnchors() {
     const hash = pending.current;
     if (!hash) return;
     pending.current = null;
+    cancelScroll();
     window.scrollTo({ top: 0, behavior: 'instant' });
+    if (hash === 'top') return;
     // Ждём конца анимации появления страницы (сдвиг translateY исказил бы расчёт цели)
     let done = false;
     const go = () => {

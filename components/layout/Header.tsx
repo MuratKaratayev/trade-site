@@ -22,7 +22,7 @@ export function Header({ nav, phone, email }: Props) {
     <header className="sticky top-0 z-40 border-b border-line bg-bg">
       {/* Высота 96: охранное поле логотипа ≥ 32 px сверху и снизу на десктопе */}
       <div className="container-site flex h-[72px] items-center gap-8 lg:h-24">
-        <Logo />
+        <Logo onClick={() => setOpen(false)} />
         <nav aria-label="Основная навигация" className="ml-auto hidden lg:block">
           <ul className="flex gap-5 text-[15px] font-medium xl:gap-7">
             {nav.map((i) => (
