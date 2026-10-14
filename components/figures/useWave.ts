@@ -1,39 +1,55 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { DURATION, EASE, FALLOFF, STAGGER } from './iso';
+import { FALLOFF, STAGGER } from './iso';
 
-type El = { from: number; to: number; start: number; cur: number; d: number };
+// cur/vel — положение и скорость; to — цель; next/at — отложенная цель (задержка кольца или удержание);
+// hold — до какого момента элемент не опускается; d — последнее кольцо (для задержки при уходе курсора)
+type El = { cur: number; vel: number; to: number; next: number | null; at: number; hold: number; d: number };
 
 const SCRUB_RISE = 60; // мс, постоянная времени подъёма в scrub-режиме
 const SCRUB_FALL = 200; // мс, опускания
+// Курсор: критически затухающая пружина — смена цели сохраняет скорость, поэтому без толчков и перелёта.
+// W = 13 1/с: 90% пути за ~0,3 с, покой за ~0,5 с (по длительности брендбука, 600 мс).
+const W = 13;
+const HOLD = 350; // мс: элемент под курсором не опускается раньше — успевает подняться при быстром проходе
 
 const reducedMotion = () =>
   typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /**
- * Волна по кольцам от активного элемента (логика activate/kick из брендбука).
- * Возвращает текущие значения 0…1 для каждого элемента и функцию activate.
+ * Волна по кольцам от активного элемента (логика activate из брендбука: сила по кольцам FALLOFF,
+ * задержка STAGGER на кольцо). Возвращает текущие значения 0…1 для каждого элемента, activate и scrub.
  * requestAnimationFrame крутится только пока что-то движется.
  */
 export function useWave(count: number, distance: (a: number, b: number) => number) {
-  const els = useRef<El[]>(Array.from({ length: count }, () => ({ from: 0, to: 0, start: 0, cur: 0, d: 0 })));
+  const els = useRef<El[]>(
+    Array.from({ length: count }, () => ({ cur: 0, vel: 0, to: 0, next: null, at: 0, hold: 0, d: 0 })),
+  );
   const raf = useRef<number | null>(null);
   const [, setFrame] = useState(0);
 
   const kick = useCallback(() => {
     if (raf.current != null) return;
+    let last = performance.now();
     const loop = () => {
       const now = performance.now();
+      const dt = Math.min(32, now - last) / 1000;
+      last = now;
       let moving = false;
       for (const e of els.current) {
-        if (now < e.start) {
-          moving = true;
-          continue;
+        if (e.next != null && now >= e.at) {
+          e.to = e.next;
+          e.next = null;
+          if (e.to === FALLOFF[0]) e.hold = now + HOLD;
         }
-        const p = Math.min(1, (now - e.start) / DURATION);
-        e.cur = e.from + (e.to - e.from) * EASE(p);
-        if (p < 1) moving = true;
+        e.vel += (W * W * (e.to - e.cur) - 2 * W * e.vel) * dt;
+        e.cur += e.vel * dt;
+        if (e.next != null || Math.abs(e.to - e.cur) > 0.001 || Math.abs(e.vel) > 0.01) moving = true;
+        else {
+          e.cur = e.to;
+          e.vel = 0;
+        }
       }
       setFrame((f) => (f + 1) % 1e6);
       raf.current = moving ? requestAnimationFrame(loop) : null;
@@ -51,18 +67,19 @@ export function useWave(count: number, distance: (a: number, b: number) => numbe
         const target = d != null && d < FALLOFF.length ? FALLOFF[d] : 0;
         const ring = d == null ? Math.min(e.d, 3) : Math.min(d, 3);
         if (d != null) e.d = d;
-        if (target === e.to) return;
-        e.from = e.cur;
-        e.to = target;
-        e.start = now + (red ? 0 : ring * STAGGER);
         // prefers-reduced-motion: сразу конечное состояние, без анимации
         if (red) {
-          e.cur = target;
-          e.from = target;
-          e.start = now - DURATION;
+          e.cur = e.to = target;
+          e.vel = 0;
+          e.next = null;
+          return;
         }
+        if (target === (e.next ?? e.to)) return;
+        e.next = target;
+        e.at = Math.max(now + ring * STAGGER, target < e.to ? e.hold : 0);
       });
-      kick();
+      if (red) setFrame((f) => (f + 1) % 1e6);
+      else kick();
     },
     [distance, kick],
   );
