@@ -4,12 +4,13 @@ import { useEffect, type RefObject } from 'react';
 
 /**
  * Мобильный режим фигур (устройства без hover): волной управляет прокрутка, а не касание.
- * Пока фигура проходит через экран, активный элемент «едет» по ней (pickIndex(t), t ∈ [0, 1)).
- * У краёв экрана (вход и выход) — покой. Срабатывает только после первой прокрутки,
+ * Пока фигура видна целиком (между шапкой и нижним краем экрана), активный элемент «едет» по ней
+ * (pickIndex(t), t ∈ [0, 1)). Пока фигура входит в экран или уходит за него — покой. Срабатывает только после первой прокрутки,
  * чтобы при загрузке ничего не двигалось само. prefers-reduced-motion → фигура статична.
  * На десктопе (hover: hover) хук ничего не делает — там управляет курсор.
  */
-const EDGE = 0.15; // доля пути у входа и у выхода, где фигура в покое
+const SETTLE = 0.75; // волна занимает 75% пути «видна целиком», последняя четверть — на возврат в покой (1 с)
+const EDGE = 0.15; // запасной режим (фигура выше экрана): доля пути у входа и у выхода, где фигура в покое
 
 export function isTouchOnly() {
   return typeof window !== 'undefined' && window.matchMedia('(hover: none)').matches;
@@ -35,9 +36,14 @@ export function useScrollWave(
       if (!scrolled || !visible) return;
       const r = el.getBoundingClientRect();
       const vh = window.innerHeight;
-      // p: 0 — верх фигуры у нижнего края экрана, 1 — низ фигуры у верхнего края
-      const p = (vh - r.top) / (vh + r.height);
-      const t = (p - EDGE) / (1 - 2 * EDGE);
+      const headerBottom = document.querySelector('header')?.getBoundingClientRect().bottom ?? 0;
+      // Волна идёт, пока фигура видна целиком: t = 0 — низ фигуры поднялся над нижним краем экрана,
+      // t = 1 — пройдено SETTLE этого пути (остаток — чтобы фигура успокоилась на виду, а не под шапкой). Фигура выше видимой области → по центру, в средних 70% экрана.
+      const from = vh - r.height;
+      const t =
+        from - headerBottom > 40
+          ? (from - r.top) / ((from - headerBottom) * SETTLE)
+          : ((vh - r.top - r.height / 2) / (vh - headerBottom) - EDGE) / (1 - 2 * EDGE);
       const idx = t < 0 || t >= 1 ? null : pickIndex(t);
       if (idx !== last) {
         last = idx;
