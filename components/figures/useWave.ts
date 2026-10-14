@@ -13,12 +13,7 @@ const reducedMotion = () =>
  * Возвращает текущие значения 0…1 для каждого элемента и функцию activate.
  * requestAnimationFrame крутится только пока что-то движется.
  */
-export type WaveTiming = { duration: number; stagger: number };
-const DEFAULT_TIMING: WaveTiming = { duration: DURATION, stagger: STAGGER };
-
-export function useWave(count: number, distance: (a: number, b: number) => number, timing: WaveTiming = DEFAULT_TIMING) {
-  const t = useRef(timing);
-  t.current = timing;
+export function useWave(count: number, distance: (a: number, b: number) => number) {
   const els = useRef<El[]>(Array.from({ length: count }, () => ({ from: 0, to: 0, start: 0, cur: 0, d: 0 })));
   const raf = useRef<number | null>(null);
   const [, setFrame] = useState(0);
@@ -33,7 +28,7 @@ export function useWave(count: number, distance: (a: number, b: number) => numbe
           moving = true;
           continue;
         }
-        const p = Math.min(1, (now - e.start) / t.current.duration);
+        const p = Math.min(1, (now - e.start) / DURATION);
         e.cur = e.from + (e.to - e.from) * EASE(p);
         if (p < 1) moving = true;
       }
@@ -43,6 +38,16 @@ export function useWave(count: number, distance: (a: number, b: number) => numbe
     raf.current = requestAnimationFrame(loop);
   }, []);
 
+  /** Сила элемента j, когда активен idx (null — покой) */
+  const level = useCallback(
+    (idx: number | null, j: number) => {
+      if (idx == null) return 0;
+      const d = distance(idx, j);
+      return d < FALLOFF.length ? FALLOFF[d] : 0;
+    },
+    [distance],
+  );
+
   /** idx = null — курсор ушёл: всё возвращается в покой */
   const activate = useCallback(
     (idx: number | null) => {
@@ -50,23 +55,49 @@ export function useWave(count: number, distance: (a: number, b: number) => numbe
       const red = reducedMotion();
       els.current.forEach((e, j) => {
         const d = idx == null ? null : distance(idx, j);
-        const target = d != null && d < FALLOFF.length ? FALLOFF[d] : 0;
+        const target = level(idx, j);
         const ring = d == null ? Math.min(e.d, 3) : Math.min(d, 3);
         if (d != null) e.d = d;
         if (target === e.to) return;
         e.from = e.cur;
         e.to = target;
-        e.start = now + (red ? 0 : ring * t.current.stagger);
+        e.start = now + (red ? 0 : ring * STAGGER);
         // prefers-reduced-motion: сразу конечное состояние, без анимации
         if (red) {
           e.cur = target;
           e.from = target;
-          e.start = now - t.current.duration;
+          e.start = now - DURATION;
         }
       });
       kick();
     },
-    [distance, kick],
+    [distance, level, kick],
+  );
+
+  /**
+   * Scrub (телефон): значения задаёт прокрутка. samples — положения волны, пройденные с прошлого кадра,
+   * каждое — смесь состояний «активен a» и «активен b» с долей f; цель элемента — максимум по ним,
+   * чтобы быстрая прокрутка не перескакивала верх. Подъём сразу, опускание — анимацией (кривая брендбука).
+   */
+  const scrub = useCallback(
+    (samples: [a: number | null, b: number | null, f: number][]) => {
+      const now = performance.now();
+      els.current.forEach((e, j) => {
+        let v = 0;
+        for (const [a, b, f] of samples) v = Math.max(v, level(a, j) + (level(b, j) - level(a, j)) * f);
+        if (v >= e.cur) {
+          e.cur = e.from = e.to = v;
+          e.start = 0;
+        } else if (v !== e.to) {
+          e.from = e.cur;
+          e.to = v;
+          e.start = now;
+        }
+      });
+      setFrame((n) => (n + 1) % 1e6);
+      kick();
+    },
+    [level, kick],
   );
 
   useEffect(
@@ -77,5 +108,5 @@ export function useWave(count: number, distance: (a: number, b: number) => numbe
     [],
   );
 
-  return { values: els.current.map((e) => e.cur), activate };
+  return { values: els.current.map((e) => e.cur), activate, scrub };
 }
