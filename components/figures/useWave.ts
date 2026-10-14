@@ -10,9 +10,9 @@ type El = { cur: number; vel: number; to: number; next: number | null; at: numbe
 const SCRUB_RISE = 60; // мс, постоянная времени подъёма в scrub-режиме
 const SCRUB_FALL = 200; // мс, опускания
 // Курсор: критически затухающая пружина — смена цели сохраняет скорость, поэтому без толчков и перелёта.
-// W = 13 1/с: 90% пути за ~0,3 с, покой за ~0,5 с (по длительности брендбука, 600 мс).
-const W = 13;
-const HOLD = 350; // мс: элемент под курсором не опускается раньше — успевает подняться при быстром проходе
+// W = 15 1/с: 90% пути за ~0,26 с, 99% за ~0,44 с (в пределах длительности брендбука, 600 мс).
+const W = 15;
+const HOLD = 450; // мс: элемент под курсором не опускается раньше — успевает подняться до конца при быстром проходе
 
 const reducedMotion = () =>
   typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -41,7 +41,6 @@ export function useWave(count: number, distance: (a: number, b: number) => numbe
         if (e.next != null && now >= e.at) {
           e.to = e.next;
           e.next = null;
-          if (e.to === FALLOFF[0]) e.hold = now + HOLD;
         }
         e.vel += (W * W * (e.to - e.cur) - 2 * W * e.vel) * dt;
         e.cur += e.vel * dt;
@@ -72,6 +71,13 @@ export function useWave(count: number, distance: (a: number, b: number) => numbe
           e.cur = e.to = target;
           e.vel = 0;
           e.next = null;
+          return;
+        }
+        // Элемент под курсором — сразу и с удержанием: отложенный подъём мог бы перезаписаться опусканием
+        if (d === 0) {
+          e.to = target;
+          e.next = null;
+          e.hold = now + HOLD;
           return;
         }
         if (target === (e.next ?? e.to)) return;
