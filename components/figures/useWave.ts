@@ -5,6 +5,9 @@ import { DURATION, EASE, FALLOFF, STAGGER } from './iso';
 
 type El = { from: number; to: number; start: number; cur: number; d: number };
 
+const SCRUB_RISE = 60; // мс, постоянная времени подъёма в scrub-режиме
+const SCRUB_FALL = 200; // мс, опускания
+
 const reducedMotion = () =>
   typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -38,16 +41,6 @@ export function useWave(count: number, distance: (a: number, b: number) => numbe
     raf.current = requestAnimationFrame(loop);
   }, []);
 
-  /** Сила элемента j, когда активен idx (null — покой) */
-  const level = useCallback(
-    (idx: number | null, j: number) => {
-      if (idx == null) return 0;
-      const d = distance(idx, j);
-      return d < FALLOFF.length ? FALLOFF[d] : 0;
-    },
-    [distance],
-  );
-
   /** idx = null — курсор ушёл: всё возвращается в покой */
   const activate = useCallback(
     (idx: number | null) => {
@@ -55,7 +48,7 @@ export function useWave(count: number, distance: (a: number, b: number) => numbe
       const red = reducedMotion();
       els.current.forEach((e, j) => {
         const d = idx == null ? null : distance(idx, j);
-        const target = level(idx, j);
+        const target = d != null && d < FALLOFF.length ? FALLOFF[d] : 0;
         const ring = d == null ? Math.min(e.d, 3) : Math.min(d, 3);
         if (d != null) e.d = d;
         if (target === e.to) return;
@@ -71,39 +64,50 @@ export function useWave(count: number, distance: (a: number, b: number) => numbe
       });
       kick();
     },
-    [distance, level, kick],
+    [distance, kick],
   );
 
   /**
-   * Scrub (телефон): значения задаёт прокрутка. samples — положения волны, пройденные с прошлого кадра,
-   * каждое — смесь состояний «активен a» и «активен b» с долей f; цель элемента — максимум по ним,
-   * чтобы быстрая прокрутка не перескакивала верх. Подъём сразу, опускание — анимацией (кривая брендбука).
+   * Scrub (телефон): цели 0…1 для каждого элемента задаёт прокрутка (useScrollWave), значения догоняют их
+   * с короткой инерцией — подъём быстрее, опускание мягче. Без неё волна дёргается вслед за кадрами прокрутки.
+   * Если за кадр пришло несколько целей, берётся максимум — пик не теряется.
    */
-  const scrub = useCallback(
-    (samples: [a: number | null, b: number | null, f: number][]) => {
+  const targets = useRef<number[] | null>(null);
+  const fresh = useRef(false);
+  const sraf = useRef<number | null>(null);
+  const scrub = useCallback((next: number[]) => {
+    const prev = targets.current;
+    targets.current = fresh.current && prev ? next.map((v, j) => Math.max(v, prev[j])) : next;
+    fresh.current = true;
+    if (sraf.current != null) return;
+    let last = performance.now();
+    const loop = () => {
       const now = performance.now();
+      const dt = Math.min(64, now - last);
+      last = now;
+      fresh.current = false;
+      const tg = targets.current ?? [];
+      let moving = false;
       els.current.forEach((e, j) => {
-        let v = 0;
-        for (const [a, b, f] of samples) v = Math.max(v, level(a, j) + (level(b, j) - level(a, j)) * f);
-        if (v >= e.cur) {
-          e.cur = e.from = e.to = v;
-          e.start = 0;
-        } else if (v !== e.to) {
-          e.from = e.cur;
-          e.to = v;
-          e.start = now;
+        const diff = (tg[j] ?? 0) - e.cur;
+        if (Math.abs(diff) < 0.002) {
+          e.cur = tg[j] ?? 0;
+          return;
         }
+        e.cur += diff * (1 - Math.exp(-dt / (diff > 0 ? SCRUB_RISE : SCRUB_FALL)));
+        moving = true;
       });
       setFrame((n) => (n + 1) % 1e6);
-      kick();
-    },
-    [level, kick],
-  );
+      sraf.current = moving ? requestAnimationFrame(loop) : null;
+    };
+    sraf.current = requestAnimationFrame(loop);
+  }, []);
 
   useEffect(
     () => () => {
       if (raf.current != null) cancelAnimationFrame(raf.current);
-      raf.current = null;
+      if (sraf.current != null) cancelAnimationFrame(sraf.current);
+      raf.current = sraf.current = null;
     },
     [],
   );

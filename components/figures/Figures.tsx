@@ -23,7 +23,7 @@ const fieldPick = (k: number) => k * N + k;
 function KipField({ intensity = 0.6 }: FigureProps) {
   const { values, activate, scrub } = useWave(N * N, fieldDistance);
   const ref = useRef<SVGSVGElement>(null);
-  useScrollWave(ref, N, scrub, fieldPick);
+  useScrollWave(ref, { steps: N, count: N * N, distance: fieldDistance }, scrub, fieldPick);
   const m = amplitude(intensity);
   const g: Grid = { s: 26, ox: 229, oy: 150 };
   const solids: Solid[] = [];
@@ -54,7 +54,7 @@ const linear = (p: number, q: number) => Math.abs(p - q);
 function DinRail({ intensity = 0.6 }: FigureProps) {
   const { values, activate, scrub } = useWave(8, linear);
   const ref = useRef<SVGSVGElement>(null);
-  useScrollWave(ref, 8, scrub);
+  useScrollWave(ref, { steps: 8, count: 8, distance: linear }, scrub);
   const m = amplitude(intensity);
   const g: Grid = { s: 24, ox: 160, oy: 200 };
   const solids: Solid[] = [];
@@ -95,7 +95,7 @@ function DinRail({ intensity = 0.6 }: FigureProps) {
 function Rack({ intensity = 0.6 }: FigureProps) {
   const { values, activate, scrub } = useWave(6, linear);
   const ref = useRef<SVGSVGElement>(null);
-  useScrollWave(ref, 6, scrub);
+  useScrollWave(ref, { steps: 6, count: 6, distance: linear }, scrub);
   const m = amplitude(intensity);
   const g: Grid = { s: 38, ox: 250, oy: 290 };
   const solids: Solid[] = [];
