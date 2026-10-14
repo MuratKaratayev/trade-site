@@ -1,0 +1,323 @@
+@import 'tailwindcss';
+
+/* ── Токены брендбука (лист 01 / 04). Тёмная тема — база. ──────────────────
+   Тема переключается ТОЛЬКО атрибутом data-theme на <html>.
+   В компонентах — только эти токены, никаких хардкод-цветов. */
+:root {
+  --bg: #14171a;
+  --surface: #1e2226;
+  --line: #2e343a;
+  --text: #f2f3f4;
+  --text-muted: #9aa3ab;
+  --accent: #d73313;
+  --on-accent: #ffffff;
+  --accent-text: #ff5a36;
+  --figure: #c9ced3;
+  --figure-dim: #5d666e;
+  --logo-plate: #ffffff;
+
+  /* Производные токены (значения взяты из брендбука) */
+  --figure-hot: rgba(215, 51, 19, 0.28); /* верхняя грань активного элемента, лист 03 */
+  --photo-overlay: rgba(20, 23, 26, 0.55); /* затемнение фото на тёмной теме, лист 01 */
+
+  --font-display: var(--font-unbounded), 'Unbounded', sans-serif;
+  --font-body: var(--font-onest), 'Onest', system-ui, sans-serif;
+  --radius-sm: 2px;
+  --radius: 4px;
+  --radius-card: 6px;
+  --container: 1280px;
+  --gutter: 24px;
+
+  color-scheme: dark;
+}
+
+[data-theme='light'] {
+  --bg: #ffffff;
+  --surface: #f4f5f6;
+  --line: #dcdfe2;
+  --text: #14171a;
+  --text-muted: #5b636b;
+  --accent-text: #a82710;
+  --figure: #3a4148;
+  --figure-dim: #a3aab1;
+  --logo-plate: transparent;
+
+  --figure-hot: rgba(215, 51, 19, 0.16); /* в скрипте листа 03 для светлой темы — 0.16 */
+  --photo-overlay: transparent;
+
+  color-scheme: light;
+}
+
+@media (max-width: 767px) {
+  :root {
+    --gutter: 16px;
+  }
+}
+
+/* Токены → утилиты Tailwind (bg-surface, text-muted, border-line …) */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-line: var(--line);
+  --color-text: var(--text);
+  --color-muted: var(--text-muted);
+  --color-accent: var(--accent);
+  --color-on-accent: var(--on-accent);
+  --color-accent-text: var(--accent-text);
+  --color-figure: var(--figure);
+  --color-figure-dim: var(--figure-dim);
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+  --radius-sm: var(--radius-sm);
+  --radius: var(--radius);
+  --radius-card: var(--radius-card);
+}
+
+/* ── База ─────────────────────────────────────────────── */
+@layer base {
+  html {
+    /* Плавная прокрутка к якорям — своя, медленнее (SmoothAnchors.tsx); здесь только отступ под шапку */
+    scroll-padding-top: 96px;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 24px;
+    -webkit-font-smoothing: antialiased;
+  }
+  :focus-visible {
+    outline: 2px solid var(--accent-text);
+    outline-offset: 3px;
+  }
+  ::selection {
+    background: var(--accent);
+    color: var(--on-accent);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+}
+
+/* ── Типографика (лист 01): мобильный / десктоп ≥768 ─── */
+@layer components {
+  /* Unbounded широкий: длинные слова не влезают на узких экранах. Точки переноса — U+00AD
+     из lib/hyphenate.ts (hyphens: manual); overflow-wrap — страховка для слов вне словаря. */
+  .t-display,
+  .t-h2,
+  .t-h3 {
+    hyphens: manual;
+    overflow-wrap: break-word;
+  }
+  .t-display {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 36px;
+    line-height: 44px;
+    text-wrap: balance;
+  }
+  .t-h2 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 28px;
+    line-height: 36px;
+    text-wrap: balance;
+  }
+  .t-h3 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 20px;
+    line-height: 28px;
+  }
+  .t-body-l {
+    font-size: 17px;
+    line-height: 26px;
+  }
+  .t-body {
+    font-size: 16px;
+    line-height: 24px;
+  }
+  .t-label {
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent-text);
+  }
+  @media (min-width: 768px) {
+    .t-display {
+      font-size: 56px;
+      line-height: 64px;
+    }
+    .t-h2 {
+      font-size: 36px;
+      line-height: 44px;
+    }
+    .t-h3 {
+      font-size: 22px;
+      line-height: 30px;
+    }
+    .t-body-l {
+      font-size: 18px;
+      line-height: 28px;
+    }
+    .t-label {
+      font-size: 13px;
+    }
+  }
+
+  /* Контейнер: 1280 + поля 24 (моб. 16) */
+  .container-site {
+    width: 100%;
+    max-width: calc(var(--container) + var(--gutter) * 2);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+  }
+  /* Отступы секций 120 / 72 */
+  .section {
+    padding-block: 72px;
+  }
+  @media (min-width: 768px) {
+    .section {
+      padding-block: 120px;
+    }
+  }
+
+  /* Кнопки: высота 48, радиус 4. Primary — заливка --accent + белый. Secondary — обводка --text. */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 48px;
+    padding-inline: 24px;
+    border-radius: var(--radius);
+    font-weight: 600;
+    font-size: 15px;
+    line-height: 1;
+    white-space: nowrap;
+    transition:
+      background-color 0.2s,
+      color 0.2s,
+      border-color 0.2s;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: var(--on-accent);
+  }
+  /* В брендбуке нет hover-цвета для красного: осветление/затемнение уронило бы контраст
+     белого текста ниже 4,5:1 в одной из тем, поэтому hover — подчёркивание. */
+  .btn-primary:hover {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+  .btn-secondary {
+    border: 1px solid var(--text);
+    color: var(--text);
+  }
+  .btn-secondary:hover {
+    background: var(--surface);
+  }
+
+  /* Красная ссылка — только через --accent-text */
+  .link-accent {
+    color: var(--accent-text);
+    font-weight: 600;
+  }
+  .link-accent:hover {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+
+  /* Поля формы */
+  .field {
+    width: 100%;
+    height: 48px;
+    padding-inline: 14px;
+    border-radius: var(--radius);
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+    font-size: 16px;
+  }
+  textarea.field {
+    height: auto;
+    min-height: 120px;
+    padding-block: 12px;
+    resize: vertical;
+  }
+  .field::placeholder {
+    color: var(--text-muted);
+  }
+  .field:focus {
+    outline: none;
+    border-color: var(--text);
+  }
+  .field[aria-invalid='true'] {
+    border-color: var(--accent-text);
+  }
+
+  /* Фото: только ч/б; на тёмной теме — затемнение 55% */
+  .photo {
+    position: relative;
+    overflow: hidden;
+    background: var(--surface);
+  }
+  .photo img {
+    filter: grayscale(1);
+  }
+  .photo::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--photo-overlay);
+    pointer-events: none;
+  }
+
+  /* Переключатель темы: выбранная кнопка подсвечена сразу по data-theme-mode (ставит inline-скрипт),
+     ещё до гидратации React */
+  html[data-theme-mode='system'] .theme-opt[data-mode='system'],
+  html[data-theme-mode='light'] .theme-opt[data-mode='light'],
+  html[data-theme-mode='dark'] .theme-opt[data-mode='dark'] {
+    background: var(--surface);
+    color: var(--text);
+  }
+
+  /* Появление страницы при переходе внутри сайта (app/template.tsx) */
+  .page-enter {
+    animation: page-enter 700ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  }
+  @keyframes page-enter {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .page-enter {
+      animation: none;
+    }
+  }
+
+  /* Видимый плейсхолдер недостающих данных */
+  .placeholder {
+    display: inline;
+    padding: 0 4px;
+    border: 1px dashed var(--accent-text);
+    border-radius: var(--radius-sm);
+    color: var(--accent-text);
+    font-weight: 500;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+  }
+}
