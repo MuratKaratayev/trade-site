@@ -20,7 +20,8 @@
   --figure-hot: rgba(215, 51, 19, 0.28); /* верхняя грань активного элемента, лист 03 */
   --photo-overlay: rgba(20, 23, 26, 0.55); /* затемнение фото на тёмной теме, лист 01 */
 
-  --font-display: var(--font-unbounded), 'Unbounded', sans-serif;
+  /* В Unbounded нет казахских букв (ә ғ қ ң ө ұ ү һ) — браузер берёт их из Onest того же веса */
+  --font-display: var(--font-unbounded), var(--font-onest), sans-serif;
   --font-body: var(--font-onest), 'Onest', system-ui, sans-serif;
   --radius-sm: 2px;
   --radius: 4px;
