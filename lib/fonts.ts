@@ -1,15 +1,15 @@
 import localFont from 'next/font/local';
 
 // Шрифты брендбука — локальные копии (assets/fonts/, см. README там): сборка не ходит в Google Fonts.
-// Вариативные файлы: один файл на семейство вместо файла на каждый вес и набор символов.
+// В Unbounded дорисованы казахские буквы, которых нет в оригинале (ә ғ қ ң ө ұ ү һ и заглавные) —
+// скрипт assets/fonts/source/build_kazakh_unbounded.py. Начертания 500 и 600 — отдельные статичные файлы.
 export const unbounded = localFont({
-  src: '../assets/fonts/Unbounded-500-600.woff2',
-  weight: '500 600',
+  src: [
+    { path: '../assets/fonts/Unbounded-500.woff2', weight: '500', style: 'normal' },
+    { path: '../assets/fonts/Unbounded-600.woff2', weight: '600', style: 'normal' },
+  ],
   display: 'swap',
   variable: '--font-unbounded',
-  // В Unbounded нет казахских букв (ә ғ қ ң ө ұ ү һ): без подменного шрифта с метриками Arial они берутся
-  // из следующего в списке --font-display — Onest того же веса (app/globals.css), а не из системного шрифта.
-  adjustFontFallback: false,
 });
 export const onest = localFont({
   src: '../assets/fonts/Onest-400-600.woff2',
