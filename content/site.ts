@@ -23,6 +23,7 @@ export const company = {
   locality: 'Павлодар',
   country: 'KZ',
   telephone: '+77182609095',
+  bin: '160840027567',
   requisites: [
     { label: 'Юридический адрес', value: 'Республика Казахстан, г. Павлодар, ул. Исы Байзакова, 252' },
     { label: 'БИН', value: '160840027567' },
@@ -240,12 +241,15 @@ export type Project = {
   city: string;
   industry: string;
   works: string[];
+  // Показывается в строке «Объекты» на первом экране (те же объекты, что на карте старого сайта)
+  featured?: boolean;
 };
 
 // Страницы «Наш опыт» (1–3) и карта на главной старого сайта. Сгруппировано по объектам.
 export const projects: Project[] = [
   {
     object: 'Павлодарская ТЭЦ-3',
+    featured: true,
     customer: 'АО «Павлодарэнерго»',
     city: 'Павлодар',
     industry: 'Теплоэнергетика',
@@ -258,6 +262,7 @@ export const projects: Project[] = [
   },
   {
     object: 'Экибастузская ТЭЦ',
+    featured: true,
     customer: 'АО «Павлодарэнерго»',
     city: 'Экибастуз',
     industry: 'Теплоэнергетика',
@@ -283,6 +288,7 @@ export const projects: Project[] = [
   },
   {
     object: 'АО ТНК «Казхром»',
+    featured: true,
     city: 'Актобе',
     industry: 'Чёрная металлургия',
     works: ['АСУТП «Вентиляция. Плавильный корпус»', 'Сопряжение дизель-генератора'],
@@ -295,6 +301,7 @@ export const projects: Project[] = [
   },
   {
     object: 'АО «Алюминий Казахстана»',
+    featured: true,
     city: 'Павлодар',
     industry: 'Цветная металлургия',
     works: [

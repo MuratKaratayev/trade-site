@@ -3,12 +3,25 @@
 import { useEffect, useState } from 'react';
 import { Icon } from '@/components/ui/Icon';
 import { Logo } from './Logo';
-import { ThemeToggle } from './ThemeToggle';
+import { ThemeToggle, type ThemeLabels } from './ThemeToggle';
+import { LangToggle, type LangLabels } from './LangToggle';
+import type { Locale } from '@/lib/i18n';
 
-type Props = { nav: { label: string; href: string }[]; phone: { label: string; href: string }; email: string };
+type Strings = { navMain: string; navMobile: string; menuOpen: string; menuClose: string; theme: string; language: string };
+type Props = {
+  nav: { label: string; href: string }[];
+  phone: { label: string; href: string };
+  email: string;
+  locale: Locale;
+  homeHref: string;
+  logoLabel: string;
+  t: Strings;
+  themeLabels: ThemeLabels;
+  langLabels: LangLabels;
+};
 
 // Клиентский компонент получает данные пропсами — модуль content/site не попадает в клиентский бандл.
-export function Header({ nav, phone, email }: Props) {
+export function Header({ nav, phone, email, locale, homeHref, logoLabel, t, themeLabels, langLabels }: Props) {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -22,8 +35,8 @@ export function Header({ nav, phone, email }: Props) {
     <header className="sticky top-0 z-40 border-b border-line bg-bg">
       {/* Высота 96: охранное поле логотипа ≥ 32 px сверху и снизу на десктопе */}
       <div className="container-site flex h-[72px] items-center gap-4 sm:gap-8 lg:h-24">
-        <Logo onClick={() => setOpen(false)} />
-        <nav aria-label="Основная навигация" className="ml-auto hidden lg:block">
+        <Logo href={homeHref} label={logoLabel} onClick={() => setOpen(false)} />
+        <nav aria-label={t.navMain} className="ml-auto hidden lg:block">
           <ul className="flex gap-5 text-[15px] font-medium xl:gap-7">
             {nav.map((i) => (
               <li key={i.href}>
@@ -38,15 +51,16 @@ export function Header({ nav, phone, email }: Props) {
           <a href={phone.href} className="hidden font-semibold whitespace-nowrap xl:inline">
             {phone.label}
           </a>
-          <div className="hidden sm:block">
-            <ThemeToggle />
+          <div className="hidden items-center gap-3 sm:flex">
+            <LangToggle locale={locale} labels={langLabels} />
+            <ThemeToggle labels={themeLabels} />
           </div>
           <button
             type="button"
             className="inline-flex size-12 items-center justify-center rounded border border-line lg:hidden"
             aria-expanded={open}
             aria-controls="mobile-menu"
-            aria-label={open ? 'Закрыть меню' : 'Открыть меню'}
+            aria-label={open ? t.menuClose : t.menuOpen}
             onClick={() => setOpen((v) => !v)}
           >
             <Icon name={open ? 'close' : 'menu'} size={22} />
@@ -54,7 +68,7 @@ export function Header({ nav, phone, email }: Props) {
         </div>
       </div>
       <div id="mobile-menu" hidden={!open} className="border-t border-line lg:hidden">
-        <nav aria-label="Мобильная навигация" className="container-site py-4">
+        <nav aria-label={t.navMobile} className="container-site py-4">
           <ul onClick={() => setOpen(false)}>
             {nav.map((i) => (
               <li key={i.href}>
@@ -65,8 +79,12 @@ export function Header({ nav, phone, email }: Props) {
             ))}
           </ul>
           <div className="mt-6 flex items-center justify-between sm:hidden">
-            <span className="text-muted">Тема</span>
-            <ThemeToggle />
+            <span className="text-muted">{t.language}</span>
+            <LangToggle locale={locale} labels={langLabels} />
+          </div>
+          <div className="mt-4 flex items-center justify-between sm:hidden">
+            <span className="text-muted">{t.theme}</span>
+            <ThemeToggle labels={themeLabels} />
           </div>
           <a href={phone.href} className="mt-6 block text-lg font-semibold">
             {phone.label}

@@ -45,14 +45,16 @@ function attachSystemListener() {
   });
 }
 
-const OPTIONS: { mode: ThemeMode; label: string; icon: IconName }[] = [
-  { mode: 'system', label: 'Как в системе', icon: 'monitor' },
-  { mode: 'light', label: 'Светлая тема', icon: 'sun' },
-  { mode: 'dark', label: 'Тёмная тема', icon: 'moon' },
+const OPTIONS: { mode: ThemeMode; icon: IconName }[] = [
+  { mode: 'system', icon: 'monitor' },
+  { mode: 'light', icon: 'sun' },
+  { mode: 'dark', icon: 'moon' },
 ];
 
+export type ThemeLabels = { group: string; system: string; light: string; dark: string };
+
 /** Переключатель темы: как в системе (по умолчанию) / светлая / тёмная. */
-export function ThemeToggle({ className = '' }: { className?: string }) {
+export function ThemeToggle({ labels, className = '' }: { labels: ThemeLabels; className?: string }) {
   const [mode, setModeState] = useState<ThemeMode | null>(null);
 
   useEffect(() => {
@@ -66,7 +68,7 @@ export function ThemeToggle({ className = '' }: { className?: string }) {
   const choose = (m: ThemeMode) => setMode(m);
 
   return (
-    <div role="radiogroup" aria-label="Тема оформления" className={`inline-flex rounded border border-line p-[3px] ${className}`}>
+    <div role="radiogroup" aria-label={labels.group} className={`inline-flex rounded border border-line p-[3px] ${className}`}>
       {OPTIONS.map((o, i) => {
         const checked = mode === o.mode;
         return (
@@ -75,8 +77,8 @@ export function ThemeToggle({ className = '' }: { className?: string }) {
             type="button"
             role="radio"
             aria-checked={checked}
-            aria-label={o.label}
-            title={o.label}
+            aria-label={labels[o.mode]}
+            title={labels[o.mode]}
             data-mode={o.mode}
             // Roving tabindex: в группу попадаем одним Tab, внутри — стрелками
             tabIndex={checked || (mode === null && o.mode === 'system') ? 0 : -1}

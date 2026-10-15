@@ -1,7 +1,8 @@
 'use client';
 
-import { useActionState, useEffect, useRef } from 'react';
-import { submitLead } from '@/lib/lead-validate';
+import { useActionState, useEffect, useMemo, useRef } from 'react';
+import { makeSubmitLead } from '@/lib/lead-validate';
+import type { LeadStrings } from '@/content/ui';
 import { HONEYPOT_FIELD, type LeadState } from '@/lib/lead-types';
 import { MapLink } from '@/components/ui/MapLink';
 
@@ -16,7 +17,8 @@ const initial: LeadState = { status: 'idle' };
 const FIELDS = ['name', 'phone', 'consent'] as const;
 
 // Контакты приходят пропсами из серверной страницы — content/site не попадает в клиентский бандл.
-export function LeadForm({ contacts }: { contacts: Contacts }) {
+export function LeadForm({ contacts, t, privacyHref, mapLabel }: { contacts: Contacts; t: LeadStrings; privacyHref: string; mapLabel: string }) {
+  const submitLead = useMemo(() => makeSubmitLead(t.validation), [t.validation]);
   const [state, action, pending] = useActionState(submitLead, initial);
   const err = state.fieldErrors ?? {};
   const v = state.values;
@@ -35,14 +37,14 @@ export function LeadForm({ contacts }: { contacts: Contacts }) {
     <section id="contacts" aria-labelledby="lead-title" className="section border-t border-line">
       <div id="lead" className="container-site grid grid-cols-12 gap-x-6 gap-y-12">
         <div className="col-span-12 flex flex-col gap-6 lg:col-span-5">
-          <span className="t-label">Контакты</span>
+          <span className="t-label">{t.label}</span>
           <h2 id="lead-title" className="t-h2">
-            Оставить заявку
+            {t.title}
           </h2>
-          <p className="t-body-l text-muted">Опишите объект и задачу — подготовим технические решения и бюджетную оценку.</p>
+          <p className="t-body-l text-muted">{t.sub}</p>
           <dl className="mt-2 flex flex-col gap-5">
             <div>
-              <dt className="text-sm text-muted">Телефоны</dt>
+              <dt className="text-sm text-muted">{t.phones}</dt>
               <dd className="flex flex-col">
                 {contacts.phones.map((p) => (
                   <a key={p.href} href={p.href} className="py-1 text-lg font-semibold">
@@ -52,7 +54,7 @@ export function LeadForm({ contacts }: { contacts: Contacts }) {
               </dd>
             </div>
             <div>
-              <dt className="text-sm text-muted">Почта</dt>
+              <dt className="text-sm text-muted">{t.email}</dt>
               <dd>
                 <a href={`mailto:${contacts.email}`} className="link-accent">
                   {contacts.email}
@@ -60,9 +62,9 @@ export function LeadForm({ contacts }: { contacts: Contacts }) {
               </dd>
             </div>
             <div>
-              <dt className="text-sm text-muted">Адрес</dt>
+              <dt className="text-sm text-muted">{t.address}</dt>
               <dd>
-                <MapLink query={contacts.mapQuery} className="underline decoration-line underline-offset-4 hover:text-accent-text">
+                <MapLink query={contacts.mapQuery} srLabel={mapLabel} className="underline decoration-line underline-offset-4 hover:text-accent-text">
                   {contacts.address}
                 </MapLink>
               </dd>
@@ -79,10 +81,10 @@ export function LeadForm({ contacts }: { contacts: Contacts }) {
           aria-describedby="lead-status"
           className="relative col-span-12 flex flex-col gap-5 rounded-card border border-line bg-surface p-6 md:p-8 lg:col-span-6 lg:col-start-7"
         >
-          <p className="text-sm text-muted">Все поля, кроме сообщения, обязательны.</p>
+          <p className="text-sm text-muted">{t.required}</p>
           <div className="flex flex-col gap-2">
             <label htmlFor="lead-name" className="text-sm font-medium text-muted">
-              Имя
+              {t.name}
             </label>
             <input
               id="lead-name"
@@ -102,7 +104,7 @@ export function LeadForm({ contacts }: { contacts: Contacts }) {
           </div>
           <div className="flex flex-col gap-2">
             <label htmlFor="lead-phone" className="text-sm font-medium text-muted">
-              Телефон
+              {t.phone}
             </label>
             <input
               id="lead-phone"
@@ -125,7 +127,7 @@ export function LeadForm({ contacts }: { contacts: Contacts }) {
           </div>
           <div className="flex flex-col gap-2">
             <label htmlFor="lead-message" className="text-sm font-medium text-muted">
-              Сообщение <span className="font-normal">(необязательно)</span>
+              {t.message} <span className="font-normal">{t.optional}</span>
             </label>
             <textarea
               id="lead-message"
@@ -144,7 +146,7 @@ export function LeadForm({ contacts }: { contacts: Contacts }) {
           </div>
           {/* Honeypot: скрыт от людей и скринридеров */}
           <div aria-hidden="true" className="absolute -left-[9999px] h-px w-px overflow-hidden">
-            <label htmlFor="lead-hp">Не заполняйте это поле</label>
+            <label htmlFor="lead-hp">{t.honeypot}</label>
             <input id="lead-hp" name={HONEYPOT_FIELD} tabIndex={-1} autoComplete="off" />
           </div>
           <div className="flex flex-col gap-2">
@@ -159,10 +161,11 @@ export function LeadForm({ contacts }: { contacts: Contacts }) {
                 aria-describedby={describedBy('consent')}
               />
               <span>
-                Я согласен с{' '}
-                <a href="/privacy" target="_blank" className="link-accent underline underline-offset-4">
-                  обработкой персональных данных
+                {t.consentBefore}
+                <a href={privacyHref} target="_blank" className="link-accent underline underline-offset-4">
+                  {t.consentLink}
                 </a>
+                {t.consentAfter}
               </span>
             </label>
             {err.consent ? (
@@ -172,7 +175,7 @@ export function LeadForm({ contacts }: { contacts: Contacts }) {
             ) : null}
           </div>
           <button type="submit" disabled={pending} className="btn btn-primary self-stretch disabled:opacity-70 sm:self-start">
-            {pending ? 'Отправляем…' : 'Отправить заявку'}
+            {pending ? t.sending : t.submit}
           </button>
           <p id="lead-status" role="status" aria-live="polite" className="min-h-6 text-sm">
             {state.status !== 'idle' ? state.message : ''}

@@ -5,12 +5,12 @@ import Link from 'next/link';
  * Логотип — чистая векторная перерисовка (public/logo.svg, исходники и PNG — docs/logo/).
  * Пропорции 817×90. Тёмная тема: белая плашка (--logo-plate), padding 6–10, радиус 4. Светлая: прозрачная.
  */
-export function Logo({ onClick }: { onClick?: () => void }) {
+export function Logo({ href, label, onClick }: { href: string; label: string; onClick?: () => void }) {
   return (
     <Link
-      href="/"
+      href={href}
       onClick={onClick}
-      aria-label="TRADE-Инжиниринг — на главную"
+      aria-label={label}
       className="inline-flex shrink-0 rounded px-[10px] py-[8px]"
       style={{ background: 'var(--logo-plate)' }}
     >

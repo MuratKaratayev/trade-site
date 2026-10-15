@@ -61,6 +61,36 @@
 - **Не проверено:** реальный Plesk (есть ли Apache/«Режим прокси», как Plesk Git ведёт себя с веткой), запуск workflow в
   GitHub (появится после слияния).
 
+### Дополнение 2026-10-15 (4) — казахский язык, «Разработано karatayev.com»
+- **Запрос владельца:** казахский язык + переключатель, показывающий текущий язык; по умолчанию — язык браузера,
+  если не ru/kk — русский. В подвале всех страниц — «Разработано karatayev.com» → https://www.karatayev.com/.
+- **Устройство:**
+  - русский — прежние адреса (`/`, `/products/kip`), казахский — `/kk/…`; две корневые разметки в группах
+    `app/(ru)/layout.tsx` и `app/(kk)/layout.tsx` (разный `<html lang>`), общий код — `components/site/SiteLayout.tsx`,
+    страницы — `components/pages/*` (`HomePage`, `ProductPage`, `PrivacyPage`, `NotFoundView`);
+  - 404 для несуществующих адресов — `app/global-not-found.tsx` (двуязычная), флаг `experimental.globalNotFound`;
+  - контент: `content/site.ts` (ru, источник) + `content/site.kk.ts` (kk; продукты собираются из ru со строгим
+    переводом названий/примечаний — нет перевода → сборка падает) + `content/index.ts` `getContent(locale)`;
+    тексты интерфейса — `content/ui.ts` `getUI(locale)`; `lib/i18n.ts` (`localePath`, `stripLocale`);
+  - переключатель `components/layout/LangToggle.tsx` («РУС | ҚАЗ», текущий подсвечен, `aria-current`; ведёт на ту же
+    страницу, сохраняет `#раздел`, пишет `localStorage.lang`). На ≥ sm — в шапке рядом с темой; на телефоне — в меню
+    (в шапке нет места: логотип 210 px + бургер). `SmoothAnchors` не трогает ссылки с `hreflang`;
+  - автоопределение: `langScript` в `<head>` только русских страниц — пока нет `localStorage.lang`, идёт по
+    `navigator.languages`: первым kk → `location.replace('/kk'+путь)`; ru или ничего — остаёмся;
+  - SEO: `lib/seo.ts` `pageMetadata()` — canonical + hreflang (ru, kk, x-default) на всех страницах, `og:locale`;
+    sitemap — обе версии с `alternates`;
+  - шрифты — `lib/fonts.ts`, добавлен `cyrillic-ext` (казахские буквы U+0460–052F);
+  - ISO-сертификаты в kk-версии — казахские версии документов (`public/certificates/iso-*-kk.webp`);
+  - `lib/hyphenate.ts` — переносы для 5 длинных казахских слов (иначе переполнение при 320 px);
+  - `.htaccess`: `/kk/products/sredstva-avtomatizacii` → `/kk#products`.
+- **Перевод на казахский сделан без носителя языка** — обязательно вычитать (`content/site.kk.ts`, `content/ui.ts`,
+  `components/pages/PrivacyPage.tsx`). Названия систем в подписях ISO сверены с казахскими текстами сертификатов.
+- **Проверено** (Apache 2.4 + `out/`): `i18n.js` 39/39 (автоопределение kk-KZ / en / ru / [en,kk] / [ru,kk],
+  сохранённый выбор, переключатель и hash, `html lang`, нет русских строк интерфейса на kk, ссылки остаются в /kk,
+  форма на kk, karatayev в подвале, мобильное меню); регрессия content15 22, theme3 15, func3 13, fix_tests 17,
+  anchors 13, logo 11, scrollwave 13; `ov5` 11 страниц × 10 ширин — без переполнений; axe 0 (7 страниц);
+  Lighthouse `/kk` mobile 96/100/100/100 (hreflang, canonical — ок).
+
 ## Текущее состояние
 - **Код:** Next.js 16 App Router (`next@16.3.8`); одностраничник `/` + `/products/[slug]` (4 категории) + `/privacy`
   (черновик). Контент — `content/site.ts`; плейсхолдеры `[ОТ КЛИЕНТА: …]` видимы на сайте.

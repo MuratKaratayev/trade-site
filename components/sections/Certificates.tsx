@@ -1,16 +1,20 @@
 import Image from 'next/image';
-import { certificates } from '@/content/site';
+import { getContent } from '@/content';
+import { getUI } from '@/content/ui';
+import type { Locale } from '@/lib/i18n';
 import { SectionHead } from '@/components/ui/SectionHead';
 import { Text } from '@/components/ui/Text';
 import { CertificateLightbox } from './CertificateLightbox';
 
 // Серверная секция: разметка и подписи рендерятся на сервере, на клиент уходит только лайтбокс.
-export function Certificates() {
+export function Certificates({ locale }: { locale: Locale }) {
+  const { certificates } = getContent(locale);
+  const t = getUI(locale).certificates;
   return (
     <section id="certificates" aria-labelledby="certificates-title" className="section border-t border-line">
       <div className="container-site flex flex-col gap-12">
-        <SectionHead label="Документы" title="Сертификаты и свидетельства" id="certificates-title" />
-        <CertificateLightbox items={certificates}>
+        <SectionHead label={t.label} title={t.title} id="certificates-title" />
+        <CertificateLightbox items={certificates} labels={{ close: t.close, view: t.view, fallback: t.fallback }}>
           {certificates.map((c, i) => (
             <li key={c.src}>
               <button type="button" data-cert={i} className="group flex w-full flex-col gap-3 text-left">

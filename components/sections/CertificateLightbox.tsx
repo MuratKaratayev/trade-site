@@ -7,7 +7,7 @@ import { Icon } from '@/components/ui/Icon';
 type Item = { src: string; caption: string };
 
 /** Лайтбокс на нативном <dialog>: фокус-ловушка, Esc и возврат фокуса — средствами браузера. */
-export function CertificateLightbox({ items, children }: { items: Item[]; children: ReactNode }) {
+export function CertificateLightbox({ items, labels, children }: { items: Item[]; labels: { close: string; view: string; fallback: string }; children: ReactNode }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const [current, setCurrent] = useState<number | null>(null);
 
@@ -25,7 +25,7 @@ export function CertificateLightbox({ items, children }: { items: Item[]; childr
   };
 
   const item = current != null ? items[current] : null;
-  const caption = item?.caption.replace(/^\[ОТ КЛИЕНТА:.*\]$/, 'Документ компании') ?? '';
+  const caption = item?.caption.replace(/^\[ОТ КЛИЕНТА:.*\]$/, labels.fallback) ?? '';
 
   return (
     <>
@@ -37,13 +37,13 @@ export function CertificateLightbox({ items, children }: { items: Item[]; childr
         onClose={() => setCurrent(null)}
         onClick={(e) => e.target === e.currentTarget && setCurrent(null)}
         className="m-auto max-h-[92vh] w-[min(92vw,960px)] rounded-card border border-line bg-bg p-0 text-text backdrop:bg-bg/80"
-        aria-label={caption || 'Просмотр документа'}
+        aria-label={caption || labels.view}
       >
         {item ? (
           <div className="flex flex-col">
             <div className="flex items-center justify-between gap-4 border-b border-line p-4">
               <span className="text-sm">{caption}</span>
-              <button type="button" onClick={() => setCurrent(null)} aria-label="Закрыть" className="inline-flex size-11 shrink-0 items-center justify-center rounded border border-line">
+              <button type="button" onClick={() => setCurrent(null)} aria-label={labels.close} className="inline-flex size-11 shrink-0 items-center justify-center rounded border border-line">
                 <Icon name="close" size={20} />
               </button>
             </div>
