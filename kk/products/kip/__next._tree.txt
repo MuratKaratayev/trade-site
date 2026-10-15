@@ -1,8 +1,9 @@
-:HL["/_next/static/chunks/2nv73vk0193l6.css","style"]
+:HL["/_next/static/chunks/2bkvhou64qz06.css","style"]
 :HL["/_next/static/media/16d91c780434f2ce-s.p.0y1w0k24nk0rl.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
 :HL["/_next/static/media/4084ce120da2621a-s.p.0for97nelvzih.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
 :HL["/_next/static/media/4e1c87b7aa9e2f2f-s.p.3o02-8iknf6dl.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
 :HL["/_next/static/media/8800dfc60902df36-s.p.2sla2yow9-9p_.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
 :HL["/_next/static/media/b59689b1142d37ce-s.p.1bk8_xp319hr4.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
 :HL["/_next/static/media/d0d9446e69c4847e-s.p.3h31fjnwrfycc.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
-0:{"tree":{"name":"","param":null,"prefetchHints":4176,"slots":{"children":{"name":"(kk)","param":null,"prefetchHints":4144,"slots":{"children":{"name":"kk","param":null,"prefetchHints":4160,"slots":{"children":{"name":"products","param":null,"prefetchHints":4192,"slots":{"children":{"name":"slug","param":{"type":"d","key":"kip","siblings":[]},"prefetchHints":4192,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":4256,"slots":null}}}}}}}}}}},"staleTime":300,"buildId":"btZ80V0aJKj7smzDErWwe"}
+:HL["/karatayev.svg","image"]
+0:{"tree":{"name":"","param":null,"prefetchHints":4176,"slots":{"children":{"name":"(kk)","param":null,"prefetchHints":4144,"slots":{"children":{"name":"kk","param":null,"prefetchHints":4160,"slots":{"children":{"name":"products","param":null,"prefetchHints":4192,"slots":{"children":{"name":"slug","param":{"type":"d","key":"kip","siblings":[]},"prefetchHints":4192,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":4256,"slots":null}}}}}}}}}}},"staleTime":300,"buildId":"dq9PGEPW_cP9Vf-VBi9WY"}
