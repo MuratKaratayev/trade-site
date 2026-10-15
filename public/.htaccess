@@ -1,0 +1,65 @@
+# Настройки для хостинга PS Cloud (Plesk, Apache за nginx). При сборке попадает в корень сайта (out/.htaccess).
+# Проверено локально на Apache 2.4 (см. docs/DEPLOY.md).
+
+Options -Indexes -MultiViews
+DirectoryIndex index.html
+# В сборке есть и products/kip.html, и папка products/kip — не добавлять слэш к адресу папки
+DirectorySlash Off
+ErrorDocument 404 /404.html
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Основной адрес — https://trade-engeeniring.kz (без www)
+  RewriteCond %{HTTP_HOST} ^www\.(trade-engeeniring\.kz)$ [NC]
+  RewriteRule ^ https://%1%{REQUEST_URI} [R=301,L]
+  RewriteCond %{HTTPS} !=on
+  RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+  RewriteCond %{HTTP_HOST} ^trade-engeeniring\.kz$ [NC]
+  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
+  # 301 со старых адресов MODX (со слэшем на конце и без). Адреса абсолютные — сразу на https, без лишнего перехода
+  RewriteRule ^o-kompanii/?$ https://%{HTTP_HOST}/#about [R=301,NE,L]
+  RewriteRule ^uslugi/?$ https://%{HTTP_HOST}/#services [R=301,NE,L]
+  RewriteRule ^nash-opyit/?$ https://%{HTTP_HOST}/#experience [R=301,NE,L]
+  RewriteRule ^kontaktyi/?$ https://%{HTTP_HOST}/#contacts [R=301,NE,L]
+  RewriteRule ^produkcziya/?$ https://%{HTTP_HOST}/#products [R=301,NE,L]
+  RewriteRule ^produkcziya/asutp,-komplektnyie-shkafyi-avtomatiki(/.*)?$ https://%{HTTP_HOST}/products/shkafy-avtomatiki [R=301,L]
+  RewriteRule ^produkcziya/mikroproczessornyie-kontrolleryi(/.*)?$ https://%{HTTP_HOST}/products/kontrollery [R=301,L]
+  RewriteRule ^produkcziya/kontrolno-izmeritelnyie-priboryi(/.*)?$ https://%{HTTP_HOST}/products/kip [R=301,L]
+  # «Средства автоматизации» временно скрыты — ведём в общий раздел продукции
+  RewriteRule ^produkcziya/sredstva-avtomatizaczii(/.*)?$ https://%{HTTP_HOST}/#products [R=301,NE,L]
+  RewriteRule ^products/sredstva-avtomatizacii/?$ https://%{HTTP_HOST}/#products [R=301,NE,L]
+  # Пятая категория старого сайта — в новом каталоге её нет
+  RewriteRule ^produkcziya/analiticheskie-priboryi-zhidkix-sredstv(/.*)?$ https://%{HTTP_HOST}/#products [R=301,NE,L]
+  # Служебные адреса старого MODX
+  RewriteRule ^(manager|connectors|core|assets)(/.*)?$ - [R=404,L]
+
+  # /путь/ → /путь (кроме корня). Папки вида products/kip в сборке тоже есть — смотрим на файл .html
+  RewriteCond %{DOCUMENT_ROOT}/$1.html -f [OR]
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^(.+)/$ https://%{HTTP_HOST}/$1 [R=301,L]
+
+  # Чистые адреса: /products/kip → /products/kip.html
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{DOCUMENT_ROOT}/$1.html -f
+  RewriteRule ^(.+)$ $1.html [L]
+</IfModule>
+
+<IfModule mod_headers.c>
+  # CSP допускает inline-скрипты: Next.js и скрипт темы встраивают их в HTML
+  Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
+  Header always set Strict-Transport-Security "max-age=63072000"
+  Header always set X-Frame-Options "DENY"
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+
+  # Файлы сборки с хэшем в имени — кэш на год; HTML — всегда свежий
+  <FilesMatch "\.(js|css|woff2)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+  <FilesMatch "\.html$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+</IfModule>

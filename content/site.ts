@@ -88,6 +88,8 @@ export type Product = {
   description: string[];
   items: ProductItem[];
   legacyUrl: string;
+  // Скрыт с сайта (нет страницы, карточки и записи в sitemap), пока нет контента
+  hidden?: boolean;
 };
 
 // Тексты — со страниц каталога старого сайта (2026-10-13). Маркетинговые формулировки производителей
@@ -197,8 +199,13 @@ export const products: Product[] = [
     description: ['[ОТ КЛИЕНТА: описание раздела — на старом сайте раздел пуст]'],
     items: [],
     legacyUrl: '/produkcziya/sredstva-avtomatizaczii',
+    // Временно скрыт по решению владельца (2026-10-15): ждём от клиента описание и бренды
+    hidden: true,
   },
 ];
+
+// Категории, которые выводятся на сайте
+export const visibleProducts = products.filter((p) => !p.hidden);
 
 export const services = [
   {

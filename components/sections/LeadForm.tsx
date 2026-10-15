@@ -1,7 +1,7 @@
 'use client';
 
 import { useActionState, useEffect, useRef } from 'react';
-import { submitLead } from '@/app/actions/lead';
+import { submitLead } from '@/lib/lead-validate';
 import { HONEYPOT_FIELD, type LeadState } from '@/lib/lead-types';
 import { MapLink } from '@/components/ui/MapLink';
 

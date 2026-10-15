@@ -1,13 +1,12 @@
 # trade-site
 
 Новый сайт ТОО «TRADE-Инжиниринг» (замена https://trade-engeeniring.kz/) по согласованному брендбуку.
-Next.js 16 (App Router, TypeScript) · Tailwind CSS v4 + CSS-токены · деплой на Vercel.
+Next.js 16 (App Router, TypeScript) · Tailwind CSS v4 + CSS-токены · статическая сборка (`out/`) для хостинга PS Cloud (Plesk), см. `docs/DEPLOY.md`.
 
 ```sh
 npm install
 npm run dev        # http://localhost:3000
 npm run build      # production-сборка
-npm run start      # запуск сборки
 npm run typecheck
 ```
 
