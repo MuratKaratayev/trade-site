@@ -56,7 +56,7 @@ export function Footer({ locale }: { locale: Locale }) {
           {t.footer.privacy}
         </a>
         <span className="inline-flex items-center gap-[6px]">
-          {t.footer.madeBy}
+          {t.footer.madeBy}{' '}
           <a
             href="https://www.karatayev.com/"
             target="_blank"
