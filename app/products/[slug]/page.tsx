@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { company, isPlaceholder, products } from '@/content/site';
+import { company, isPlaceholder, visibleProducts as products } from '@/content/site';
 import { ogBase, twitterBase } from '@/lib/seo';
 import { Icon } from '@/components/ui/Icon';
 import { Text } from '@/components/ui/Text';

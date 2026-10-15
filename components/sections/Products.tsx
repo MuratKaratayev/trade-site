@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { products } from '@/content/site';
+import { visibleProducts as products } from '@/content/site';
 import { Icon } from '@/components/ui/Icon';
 import { SectionHead } from '@/components/ui/SectionHead';
 import { Text } from '@/components/ui/Text';

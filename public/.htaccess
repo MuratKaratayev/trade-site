@@ -1,0 +1,63 @@
+# Настройки для хостинга PS Cloud (Plesk, Apache за nginx). Попадает в корень сайта при сборке (out/.htaccess).
+
+Options -Indexes -MultiViews
+DirectoryIndex index.html
+# В сборке есть и products/kip.html, и папка products/kip — не добавлять слэш к адресу папки
+DirectorySlash Off
+ErrorDocument 404 /404.html
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Основной адрес — https://trade-engeeniring.kz (без www)
+  RewriteCond %{HTTP_HOST} ^www\.(trade-engeeniring\.kz)$ [NC]
+  RewriteRule ^ https://%1%{REQUEST_URI} [R=301,L]
+  RewriteCond %{HTTPS} !=on
+  RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+  RewriteCond %{HTTP_HOST} ^trade-engeeniring\.kz$ [NC]
+  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
+  # 301 со старых адресов MODX (со слэшем на конце и без)
+  RewriteRule ^o-kompanii/?$ /#about [R=301,NE,L]
+  RewriteRule ^uslugi/?$ /#services [R=301,NE,L]
+  RewriteRule ^nash-opyit/?$ /#experience [R=301,NE,L]
+  RewriteRule ^kontaktyi/?$ /#contacts [R=301,NE,L]
+  RewriteRule ^produkcziya/?$ /#products [R=301,NE,L]
+  RewriteRule ^produkcziya/asutp,-komplektnyie-shkafyi-avtomatiki(/.*)?$ /products/shkafy-avtomatiki [R=301,L]
+  RewriteRule ^produkcziya/mikroproczessornyie-kontrolleryi(/.*)?$ /products/kontrollery [R=301,L]
+  RewriteRule ^produkcziya/kontrolno-izmeritelnyie-priboryi(/.*)?$ /products/kip [R=301,L]
+  # «Средства автоматизации» временно скрыты — ведём в общий раздел продукции
+  RewriteRule ^produkcziya/sredstva-avtomatizaczii(/.*)?$ /#products [R=301,NE,L]
+  RewriteRule ^products/sredstva-avtomatizacii/?$ /#products [R=301,NE,L]
+  # Пятая категория старого сайта — в новом каталоге её нет
+  RewriteRule ^produkcziya/analiticheskie-priboryi-zhidkix-sredstv(/.*)?$ /#products [R=301,NE,L]
+  # Старая админка и служебные адреса MODX
+  RewriteRule ^(manager|connectors|core|assets)(/.*)?$ - [R=404,L]
+
+  # /путь/ → /путь (кроме корня)
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^(.+)/$ /$1 [R=301,L]
+
+  # Чистые адреса: /products/kip → /products/kip.html
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME}.html -f
+  RewriteRule ^(.+)$ $1.html [L]
+</IfModule>
+
+<IfModule mod_headers.c>
+  # CSP допускает inline-скрипты: Next.js и скрипт темы встраивают их в HTML
+  Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
+  Header always set Strict-Transport-Security "max-age=63072000"
+  Header always set X-Frame-Options "DENY"
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+
+  # Файлы сборки с хэшем в имени — кэш на год; HTML — всегда свежий
+  <FilesMatch "\.(js|css|woff2)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+  <FilesMatch "\.html$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+</IfModule>
