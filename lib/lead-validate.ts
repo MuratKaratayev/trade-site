@@ -27,11 +27,14 @@ export function validateLead(form: FormData, m: Messages): { values: LeadValues;
   return { values, fieldErrors, bot };
 }
 
-/**
- * Обработчик отправки (сообщения — на языке страницы). Приём заявок пока НЕ подключён (куда отправлять — решает
- * владелец), поэтому после проверки честно сообщаем об этом и показываем телефон.
- * Когда решение будет: отправлять FormData на PHP-обработчик на том же хостинге.
- */
+// Адрес обработчика на хостинге PS Cloud (public/lead.php): письмо на info@trade-engeeniring.kz.
+// На превью Vercel PHP нет — там отправка честно не проходит, форма показывает телефон.
+export const LEAD_ENDPOINT = '/lead.php';
+
+type Field = keyof NonNullable<LeadState['fieldErrors']>;
+const FIELD_MESSAGE: Record<Field, keyof Messages> = { name: 'name', phone: 'phone', message: 'message', consent: 'consent' };
+
+/** Обработчик отправки (сообщения — на языке страницы): проверка в браузере, затем POST на lead.php. */
 export function makeSubmitLead(m: Messages) {
   return async function submitLead(prev: LeadState, form: FormData): Promise<LeadState> {
     const submission = (prev.submission ?? 0) + 1;
@@ -40,6 +43,16 @@ export function makeSubmitLead(m: Messages) {
     if (Object.keys(fieldErrors).length) {
       return { status: 'error', message: m.check, fieldErrors, values, submission };
     }
-    return { status: 'not-configured', message: m.notConfigured, values, submission };
+    try {
+      const res = await fetch(LEAD_ENDPOINT, { method: 'POST', body: form, headers: { Accept: 'application/json' } });
+      const data = (await res.json().catch(() => null)) as { status?: string; fields?: Field[] } | null;
+      if (res.ok && data?.status === 'success') return { status: 'success', message: m.ok, submission };
+      if (res.status === 422 && data?.fields?.length) {
+        const errs: NonNullable<LeadState['fieldErrors']> = {};
+        for (const f of data.fields) if (f in FIELD_MESSAGE) errs[f] = m[FIELD_MESSAGE[f]];
+        return { status: 'error', message: m.check, fieldErrors: errs, values, submission };
+      }
+    } catch {}
+    return { status: 'failed', message: m.failed, values, submission };
   };
 }

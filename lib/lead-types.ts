@@ -4,7 +4,7 @@
 export type LeadValues = { name: string; phone: string; message: string; consent: boolean };
 
 export type LeadState = {
-  status: 'idle' | 'error' | 'success' | 'not-configured';
+  status: 'idle' | 'error' | 'success' | 'failed';
   message?: string;
   fieldErrors?: Partial<Record<'name' | 'phone' | 'message' | 'consent', string>>;
   // React 19 сбрасывает форму после action — возвращаем введённое, чтобы оно не терялось при ошибке

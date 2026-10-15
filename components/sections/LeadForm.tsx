@@ -17,7 +17,7 @@ const initial: LeadState = { status: 'idle' };
 const FIELDS = ['name', 'phone', 'consent'] as const;
 
 // Контакты приходят пропсами из серверной страницы — content/site не попадает в клиентский бандл.
-export function LeadForm({ contacts, t, privacyHref, mapLabel }: { contacts: Contacts; t: LeadStrings; privacyHref: string; mapLabel: string }) {
+export function LeadForm({ contacts, t, privacyHref, mapLabel, lang }: { contacts: Contacts; t: LeadStrings; privacyHref: string; mapLabel: string; lang: string }) {
   const submitLead = useMemo(() => makeSubmitLead(t.validation), [t.validation]);
   const [state, action, pending] = useActionState(submitLead, initial);
   const err = state.fieldErrors ?? {};
@@ -149,6 +149,7 @@ export function LeadForm({ contacts, t, privacyHref, mapLabel }: { contacts: Con
             <label htmlFor="lead-hp">{t.honeypot}</label>
             <input id="lead-hp" name={HONEYPOT_FIELD} tabIndex={-1} autoComplete="off" />
           </div>
+          <input type="hidden" name="lang" value={lang} />
           <div className="flex flex-col gap-2">
             <label className="flex items-start gap-3">
               <input
@@ -179,7 +180,7 @@ export function LeadForm({ contacts, t, privacyHref, mapLabel }: { contacts: Con
           </button>
           <p id="lead-status" role="status" aria-live="polite" className="min-h-6 text-sm">
             {state.status !== 'idle' ? state.message : ''}
-            {state.status === 'not-configured' ? (
+            {state.status === 'failed' ? (
               <>
                 {' '}
                 <a href={contacts.phones[0].href} className="link-accent">

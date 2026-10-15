@@ -25,6 +25,7 @@ export function HomePage({ locale }: { locale: Locale }) {
         t={{ ...t.lead, validation: t.validation }}
         privacyHref={localePath(locale, '/privacy')}
         mapLabel={t.map}
+        lang={locale}
       />
     </>
   );

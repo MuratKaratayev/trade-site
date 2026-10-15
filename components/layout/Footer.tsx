@@ -55,9 +55,17 @@ export function Footer({ locale }: { locale: Locale }) {
         <a href={localePath(locale, '/privacy')} className="hover:text-accent-text">
           {t.footer.privacy}
         </a>
-        <span>
-          {t.footer.madeBy}{' '}
-          <a href="https://www.karatayev.com/" target="_blank" rel="noopener" className="underline decoration-line underline-offset-4 hover:text-accent-text">
+        <span className="inline-flex items-center gap-[6px]">
+          {t.footer.madeBy}
+          <a
+            href="https://www.karatayev.com/"
+            target="_blank"
+            rel="noopener"
+            className="inline-flex items-center gap-[6px] underline decoration-line underline-offset-4 hover:text-accent-text"
+          >
+            {/* Иконка сайта karatayev.com (public/karatayev.svg, копия с сайта); alt пустой — рядом есть текст */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/karatayev.svg" alt="" width={16} height={16} className="size-4 rounded-[3px]" />
             karatayev.com
           </a>
         </span>
