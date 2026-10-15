@@ -1,19 +1,24 @@
 import Image from 'next/image';
-import { photos, projects } from '@/content/site';
+import { getContent } from '@/content';
+import { getUI } from '@/content/ui';
+import type { Locale } from '@/lib/i18n';
 import { SectionHead } from '@/components/ui/SectionHead';
 import { FigureKipField } from '@/components/figures/Figures';
 
-export function Experience() {
+export function Experience({ locale }: { locale: Locale }) {
+  const { photos, projects } = getContent(locale);
+  const ui = getUI(locale);
+  const t = ui.experience;
   return (
     <section id="experience" aria-labelledby="experience-title" className="section border-t border-line">
       <div className="container-site flex flex-col gap-12">
         <div className="grid grid-cols-12 items-end gap-x-6 gap-y-8">
           <div className="col-span-12 lg:col-span-7">
-            <SectionHead label="Наш опыт" title="Объекты и выполненные работы" id="experience-title">
-              Теплоэнергетика, чёрная и цветная металлургия, химическая и угольная промышленность Казахстана.
+            <SectionHead label={t.label} title={t.title} id="experience-title">
+              {t.sub}
             </SectionHead>
           </div>
-          <FigureKipField className="col-span-12 w-full max-w-[420px] lg:col-span-5 lg:justify-self-end" />
+          <FigureKipField label={ui.figures.kip} className="col-span-12 w-full max-w-[420px] lg:col-span-5 lg:justify-self-end" />
         </div>
 
         <ul className="border-t border-line">
@@ -24,7 +29,9 @@ export function Experience() {
                 <span className="text-sm font-medium tracking-[0.14em] text-accent-text uppercase">
                   {p.city} · {p.industry}
                 </span>
-                {p.customer ? <span className="text-muted">Заказчик: {p.customer}</span> : null}
+                {p.customer ? <span className="text-muted">
+                    {t.customer} {p.customer}
+                  </span> : null}
               </div>
               <ul className="col-span-12 flex flex-col gap-2 md:col-span-7">
                 {p.works.map((w) => (

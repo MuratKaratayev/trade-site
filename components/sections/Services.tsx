@@ -1,13 +1,17 @@
-import { services } from '@/content/site';
+import { getContent } from '@/content';
+import { getUI } from '@/content/ui';
+import type { Locale } from '@/lib/i18n';
 import { SectionHead } from '@/components/ui/SectionHead';
 import { hyphenate } from '@/lib/hyphenate';
 
-export function Services() {
+export function Services({ locale }: { locale: Locale }) {
+  const { services } = getContent(locale);
+  const t = getUI(locale).services;
   return (
     <section id="services" aria-labelledby="services-title" className="section border-t border-line">
       <div className="container-site flex flex-col gap-12">
-        <SectionHead label="Услуги" title="Полный комплекс инжиниринговых услуг в области АСУТП" id="services-title">
-          От обследования объекта до сервиса. Весь цикл или отдельный этап.
+        <SectionHead label={t.label} title={t.title} id="services-title">
+          {t.sub}
         </SectionHead>
         <ol className="grid grid-cols-1 border-t border-line md:grid-cols-2 lg:grid-cols-3">
           {services.map((s, i) => (

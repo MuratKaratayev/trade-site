@@ -1,20 +1,25 @@
 import Link from 'next/link';
-import { visibleProducts as products } from '@/content/site';
+import { getContent } from '@/content';
+import { getUI } from '@/content/ui';
+import { localePath, type Locale } from '@/lib/i18n';
 import { Icon } from '@/components/ui/Icon';
 import { SectionHead } from '@/components/ui/SectionHead';
 import { Text } from '@/components/ui/Text';
 import { FigureDinRail } from '@/components/figures/Figures';
 import { hyphenate } from '@/lib/hyphenate';
 
-export function Products() {
+export function Products({ locale }: { locale: Locale }) {
+  const { visibleProducts: products } = getContent(locale);
+  const ui = getUI(locale);
+  const t = ui.products;
   return (
     <section id="products" aria-labelledby="products-title" className="section border-t border-line">
       <div className="container-site grid grid-cols-12 gap-x-6 gap-y-12">
         <div className="col-span-12 flex flex-col justify-between gap-8 lg:col-span-5">
-          <SectionHead label="Продукция" title="Оборудование для систем автоматизации" id="products-title">
-            Комплектные шкафы, контроллеры и КИП под проект заказчика.
+          <SectionHead label={t.label} title={t.title} id="products-title">
+            {t.sub}
           </SectionHead>
-          <FigureDinRail className="w-full max-w-[460px]" />
+          <FigureDinRail label={ui.figures.rail} className="w-full max-w-[460px]" />
         </div>
         <ul className="col-span-12 grid gap-4 sm:grid-cols-2 lg:col-span-7 lg:grid-cols-1 xl:grid-cols-2">
           {products.map((p) => (
@@ -29,11 +34,11 @@ export function Products() {
               </p>
               {/* Растянутая ссылка: кликабельна вся карточка, а в дереве доступности — одна ссылка */}
               <Link
-                href={`/products/${p.slug}`}
+                href={localePath(locale, `/products/${p.slug}`)}
                 className="link-accent self-start after:absolute after:inset-0 after:rounded-card after:content-[''] focus-visible:outline-none focus-visible:after:outline-2 focus-visible:after:outline-offset-2 focus-visible:after:outline-[var(--accent-text)]"
               >
-                Подробнее <span aria-hidden="true">→</span>
-                <span className="sr-only"> о разделе «{p.title}»</span>
+                {t.more} <span aria-hidden="true">→</span>
+                <span className="sr-only">{t.moreSr(p.title)}</span>
               </Link>
             </li>
           ))}

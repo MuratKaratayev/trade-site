@@ -7,6 +7,8 @@ const nextConfig: NextConfig = {
   output: 'export',
   images: { unoptimized: true },
   poweredByHeader: false,
+  // У русской и казахской версий разные корневые разметки (<html lang>) → общая 404 — app/global-not-found.tsx
+  experimental: { globalNotFound: true },
 };
 
 export default nextConfig;

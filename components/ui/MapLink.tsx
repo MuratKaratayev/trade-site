@@ -10,7 +10,7 @@ import { useEffect, useState, type ReactNode } from 'react';
  * - остальное (Windows, Linux) → Google Maps в браузере.
  * На сервере и без JS — ссылка на Google Maps, она работает везде.
  */
-export function MapLink({ query, children, className = '' }: { query: string; children: ReactNode; className?: string }) {
+export function MapLink({ query, children, className = '', srLabel = ' (открыть на карте)' }: { query: string; children: ReactNode; className?: string; srLabel?: string }) {
   const q = encodeURIComponent(query);
   const web = `https://www.google.com/maps/search/?api=1&query=${q}`;
   const [href, setHref] = useState(web);
@@ -28,7 +28,7 @@ export function MapLink({ query, children, className = '' }: { query: string; ch
   return (
     <a href={href} className={className} {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>
       {children}
-      <span className="sr-only"> (открыть на карте)</span>
+      <span className="sr-only">{srLabel}</span>
     </a>
   );
 }

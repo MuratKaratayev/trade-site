@@ -65,17 +65,19 @@ export function SmoothAnchors() {
     const onClick = (e: MouseEvent) => {
       if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
       const a = (e.target as HTMLElement).closest<HTMLAnchorElement>('a[href]');
-      if (!a || a.target === '_blank') return;
+      // Переключатель языка (hreflang) — полный переход на другую корневую разметку, не трогаем
+      if (!a || a.target === '_blank' || a.hasAttribute('hreflang')) return;
       const href = a.getAttribute('href') ?? '';
-      if (href === '/') {
+      // Главная на любом языке: «/» и «/kk»
+      if (href === '/' || href === '/kk') {
         e.preventDefault();
-        if (window.location.pathname === '/') {
+        if (window.location.pathname === href) {
           // Уже на главной: убираем якорь из адреса и плавно едем в самый верх
-          if (window.location.hash) window.history.pushState(null, '', '/');
+          if (window.location.hash) window.history.pushState(null, '', href);
           animateScroll(0);
         } else {
           pending.current = 'top';
-          router.push('/', { scroll: false });
+          router.push(href, { scroll: false });
         }
         return;
       }

@@ -30,6 +30,7 @@ ErrorDocument 404 /404.html
   # «Средства автоматизации» временно скрыты — ведём в общий раздел продукции
   RewriteRule ^produkcziya/sredstva-avtomatizaczii(/.*)?$ https://%{HTTP_HOST}/#products [R=301,NE,L]
   RewriteRule ^products/sredstva-avtomatizacii/?$ https://%{HTTP_HOST}/#products [R=301,NE,L]
+  RewriteRule ^kk/products/sredstva-avtomatizacii/?$ https://%{HTTP_HOST}/kk#products [R=301,NE,L]
   # Пятая категория старого сайта — в новом каталоге её нет
   RewriteRule ^produkcziya/analiticheskie-priboryi-zhidkix-sredstv(/.*)?$ https://%{HTTP_HOST}/#products [R=301,NE,L]
   # Служебные адреса старого MODX

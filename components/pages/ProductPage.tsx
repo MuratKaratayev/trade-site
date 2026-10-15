@@ -1,37 +1,33 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { company, isPlaceholder, visibleProducts as products } from '@/content/site';
-import { ogBase, twitterBase } from '@/lib/seo';
+import { getContent } from '@/content';
+import { getUI } from '@/content/ui';
+import { localePath, type Locale } from '@/lib/i18n';
+import { pageMetadata } from '@/lib/seo';
 import { Icon } from '@/components/ui/Icon';
 import { Text } from '@/components/ui/Text';
 import { hyphenate } from '@/lib/hyphenate';
 
-type Params = { slug: string };
+export type ProductParams = { slug: string };
 
-export const dynamicParams = false;
-
-export function generateStaticParams(): Params[] {
-  return products.map((p) => ({ slug: p.slug }));
+// Разделы одинаковые для обоих языков (slug не переводится)
+export function productStaticParams(): ProductParams[] {
+  return getContent('ru').visibleProducts.map((p) => ({ slug: p.slug }));
 }
 
-export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
-  const { slug } = await params;
+export function productMetadata(locale: Locale, slug: string): Metadata {
+  const { visibleProducts: products, isPlaceholder } = getContent(locale);
   const p = products.find((x) => x.slug === slug);
   if (!p) return {};
-  const description = isPlaceholder(p.summary) ? `${p.title} — TRADE-Инжиниринг, Павлодар.` : p.summary;
-  const url = `/products/${p.slug}`;
-  return {
-    title: p.title,
-    description,
-    alternates: { canonical: url },
-    openGraph: { ...ogBase, title: p.title, description, url },
-    twitter: { ...twitterBase, title: p.title, description },
-  };
+  const description = isPlaceholder(p.summary) ? getUI(locale).product.metaFallback(p.title) : p.summary;
+  return pageMetadata(locale, `/products/${p.slug}`, p.title, description);
 }
 
-export default async function ProductPage({ params }: { params: Promise<Params> }) {
-  const { slug } = await params;
+export function ProductPage({ locale, slug }: { locale: Locale; slug: string }) {
+  const { company, visibleProducts: products } = getContent(locale);
+  const t = getUI(locale).product;
+  const lp = (path: string) => localePath(locale, path);
   const p = products.find((x) => x.slug === slug);
   if (!p) notFound();
 
@@ -40,9 +36,9 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Главная', item: company.url },
-      { '@type': 'ListItem', position: 2, name: 'Продукция', item: `${company.url}/#products` },
-      { '@type': 'ListItem', position: 3, name: p.title, item: `${company.url}/products/${p.slug}` },
+      { '@type': 'ListItem', position: 1, name: t.home, item: company.url + lp('/') },
+      { '@type': 'ListItem', position: 2, name: t.products, item: company.url + lp('/#products') },
+      { '@type': 'ListItem', position: 3, name: p.title, item: company.url + lp(`/products/${p.slug}`) },
     ],
   };
 
@@ -50,13 +46,13 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
     <article className="section">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbs) }} />
       <div className="container-site grid grid-cols-12 gap-x-6 gap-y-12">
-        <nav aria-label="Хлебные крошки" className="col-span-12 text-sm text-muted">
-          <Link href="/" className="hover:text-accent-text">
-            Главная
+        <nav aria-label={t.breadcrumbs} className="col-span-12 text-sm text-muted">
+          <Link href={lp('/')} className="hover:text-accent-text">
+            {t.home}
           </Link>
           <span aria-hidden="true"> / </span>
-          <Link href="/#products" className="hover:text-accent-text">
-            Продукция
+          <Link href={lp('/#products')} className="hover:text-accent-text">
+            {t.products}
           </Link>
           <span aria-hidden="true"> / </span>
           <span aria-current="page" className="text-text">
@@ -66,7 +62,7 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
 
         <header className="col-span-12 flex flex-col gap-6 lg:col-span-8">
           <Icon name={p.icon} className="text-accent-text" />
-          <span className="t-label">Продукция</span>
+          <span className="t-label">{t.products}</span>
           <h1 className="t-h2">{hyphenate(p.title)}</h1>
           {p.description.map((d) => (
             <p key={d} className="t-body-l text-muted">
@@ -77,7 +73,7 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
 
         <section aria-labelledby="items-title" className="col-span-12 flex flex-col gap-6 lg:col-span-8">
           <h2 id="items-title" className="t-h2">
-            Номенклатура
+            {t.items}
           </h2>
           {p.items.length > 0 ? (
             <ul className="border-t border-line">
@@ -96,20 +92,20 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
         </section>
 
         <aside className="col-span-12 flex flex-col gap-4 self-start rounded-card border border-line bg-surface p-6 lg:col-span-4 lg:col-start-9 lg:row-start-2 lg:row-span-2">
-          <h2 className="t-h3">Нужна поставка или подбор?</h2>
-          <p className="text-muted">Пришлите опросный лист или спецификацию — подберём оборудование под проект.</p>
-          <Link href="/#lead" className="btn btn-primary self-start">
-            Оставить заявку
+          <h2 className="t-h3">{t.asideTitle}</h2>
+          <p className="text-muted">{t.asideText}</p>
+          <Link href={lp('/#lead')} className="btn btn-primary self-start">
+            {t.asideCta}
           </Link>
         </aside>
         <nav aria-labelledby="others-title" className="col-span-12 flex flex-col gap-6 border-t border-line pt-12">
           <h2 id="others-title" className="t-h3">
-            Другие разделы
+            {t.others}
           </h2>
           <ul className="grid gap-4 sm:grid-cols-3">
             {others.map((o) => (
               <li key={o.slug}>
-                <Link href={`/products/${o.slug}`} className="flex h-full items-center gap-4 rounded-card border border-line p-4 hover:border-text">
+                <Link href={lp(`/products/${o.slug}`)} className="flex h-full items-center gap-4 rounded-card border border-line p-4 hover:border-text">
                   <Icon name={o.icon} size={32} className="shrink-0 text-accent-text" />
                   <span className="font-medium">{o.title}</span>
                 </Link>

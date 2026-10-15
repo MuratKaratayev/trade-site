@@ -10,7 +10,7 @@ import { useScrollWave } from './useScrollWave';
 // Десктоп (курсор) — тайминги брендбука (600 мс, 50 мс на кольцо, по умолчанию в useWave).
 // Телефон — scrub от прокрутки (useScrollWave), скорость задаёт палец.
 
-type FigureProps = { intensity?: number; className?: string };
+type FigureProps = { intensity?: number; className?: string; label?: string };
 
 // ── FIG 01 · Поле КИП: основание с сеткой 6×6 столбиков ──────────────
 const N = 6;
@@ -20,7 +20,7 @@ const fieldDistance = (p: number, q: number) =>
 // Прокрутка ведёт волну по диагонали поля: (0,0) → (5,5)
 const fieldPick = (k: number) => k * N + k;
 
-function KipField({ intensity = 0.6 }: FigureProps) {
+function KipField({ intensity = 0.6, label = 'Поле КИП: столбики датчиков поднимаются вокруг курсора' }: FigureProps) {
   const { values, activate, scrub } = useWave(N * N, fieldDistance);
   const ref = useRef<SVGSVGElement>(null);
   useScrollWave(ref, { steps: N, count: N * N, distance: fieldDistance }, scrub, fieldPick);
@@ -43,7 +43,7 @@ function KipField({ intensity = 0.6 }: FigureProps) {
   for (let a = 0; a < N; a++)
     for (let b = 0; b < N; b++) hits.push({ pts: hull(a, b, 0, 1, 1, 0.45, g), index: a * N + b });
 
-  return <FigureSvg svgRef={ref} label="Поле КИП: столбики датчиков поднимаются вокруг курсора" solids={solids} hits={hits} onActivate={activate} />;
+  return <FigureSvg svgRef={ref} label={label} solids={solids} hits={hits} onActivate={activate} />;
 }
 
 // ── FIG 02 · DIN-рейка: 8 модулей контроллера ────────────────────────
@@ -51,7 +51,7 @@ const linear = (p: number, q: number) => Math.abs(p - q);
 
 // Прокрутка ведёт волну по модулям слева направо
 
-function DinRail({ intensity = 0.6 }: FigureProps) {
+function DinRail({ intensity = 0.6, label = 'DIN-рейка: модуль контроллера под курсором поднимается, индикатор загорается' }: FigureProps) {
   const { values, activate, scrub } = useWave(8, linear);
   const ref = useRef<SVGSVGElement>(null);
   useScrollWave(ref, { steps: 8, count: 8, distance: linear }, scrub);
@@ -86,13 +86,13 @@ function DinRail({ intensity = 0.6 }: FigureProps) {
     hits.push({ pts: hull(i * 1.0 + 0.07, 0, 0, 0.86, 1.3, 3.4, g), index: i });
   }
 
-  return <FigureSvg svgRef={ref} label="DIN-рейка: модуль контроллера под курсором поднимается, индикатор загорается" solids={solids} hits={hits} onActivate={activate} />;
+  return <FigureSvg svgRef={ref} label={label} solids={solids} hits={hits} onActivate={activate} />;
 }
 
 // ── FIG 03 · Стойка: открытая стойка с 6 полками ─────────────────────
 // Прокрутка ведёт волну по полкам снизу вверх (страница едет вверх — волна поднимается)
 
-function Rack({ intensity = 0.6 }: FigureProps) {
+function Rack({ intensity = 0.6, label = 'Стойка: полки выдвигаются волной от курсора' }: FigureProps) {
   const { values, activate, scrub } = useWave(6, linear);
   const ref = useRef<SVGSVGElement>(null);
   useScrollWave(ref, { steps: 6, count: 6, distance: linear }, scrub);
@@ -116,28 +116,28 @@ function Rack({ intensity = 0.6 }: FigureProps) {
   pushBox(solids, faces(-0.05, -0.05, 4.45, 2.3, 1.75, 0.1, g), C.face, C.dim);
   hits.reverse();
 
-  return <FigureSvg svgRef={ref} label="Стойка: полки выдвигаются волной от курсора" solids={solids} hits={hits} onActivate={activate} />;
+  return <FigureSvg svgRef={ref} label={label} solids={solids} hits={hits} onActivate={activate} />;
 }
 
 // Публичные компоненты: ленивое монтирование + пропсы
-export function FigureKipField({ intensity, className }: FigureProps) {
+export function FigureKipField({ intensity, className, label }: FigureProps) {
   return (
     <LazyFigure className={className}>
-      <KipField intensity={intensity} />
+      <KipField intensity={intensity} label={label} />
     </LazyFigure>
   );
 }
-export function FigureDinRail({ intensity, className }: FigureProps) {
+export function FigureDinRail({ intensity, className, label }: FigureProps) {
   return (
     <LazyFigure className={className}>
-      <DinRail intensity={intensity} />
+      <DinRail intensity={intensity} label={label} />
     </LazyFigure>
   );
 }
-export function FigureRack({ intensity, className }: FigureProps) {
+export function FigureRack({ intensity, className, label }: FigureProps) {
   return (
     <LazyFigure className={className}>
-      <Rack intensity={intensity} />
+      <Rack intensity={intensity} label={label} />
     </LazyFigure>
   );
 }

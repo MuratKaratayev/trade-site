@@ -1,14 +1,41 @@
+import type { Metadata } from 'next';
 import { company } from '@/content/site';
+import { getUI } from '@/content/ui';
+import { LOCALES, OG_LOCALE, localePath, type Locale } from '@/lib/i18n';
 
 // Next.js не сливает вложенные объекты metadata: openGraph страницы заменяет корневой целиком.
 // Поэтому общие поля собраны здесь и подмешиваются на каждой странице.
-const ogImage = { url: '/og.png', width: 1200, height: 630, alt: 'TRADE-Инжиниринг — АСУТП, оборудование, инжиниринг. Павлодар.' };
+export function seoBase(locale: Locale) {
+  const ogImage = { url: '/og.png', width: 1200, height: 630, alt: getUI(locale).meta.ogAlt };
+  return {
+    ogBase: {
+      type: 'website' as const,
+      locale: OG_LOCALE[locale],
+      alternateLocale: LOCALES.filter((l) => l !== locale).map((l) => OG_LOCALE[l]),
+      siteName: company.name,
+      images: [ogImage],
+    },
+    twitterBase: { card: 'summary_large_image' as const, images: [ogImage] },
+  };
+}
 
-export const ogBase = {
-  type: 'website' as const,
-  locale: 'ru_RU',
-  siteName: company.legalName,
-  images: [ogImage],
-};
+/** canonical + hreflang для страницы: path — адрес без языкового префикса ('/', '/products/kip'). */
+export function alternates(locale: Locale, path: string): Metadata['alternates'] {
+  return {
+    canonical: localePath(locale, path),
+    languages: { ru: localePath('ru', path), kk: localePath('kk', path), 'x-default': localePath('ru', path) },
+  };
+}
 
-export const twitterBase = { card: 'summary_large_image' as const, images: [ogImage] };
+/** Полный набор метаданных страницы на нужном языке. */
+export function pageMetadata(locale: Locale, path: string, title: string | undefined, description: string): Metadata {
+  const { ogBase, twitterBase } = seoBase(locale);
+  const ogTitle = title ?? getUI(locale).meta.title;
+  return {
+    ...(title ? { title } : {}),
+    description,
+    alternates: alternates(locale, path),
+    openGraph: { ...ogBase, title: ogTitle, description, url: localePath(locale, path) },
+    twitter: { ...twitterBase, title: ogTitle, description },
+  };
+}
