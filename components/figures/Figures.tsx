@@ -5,14 +5,10 @@ import { FigureSvg } from './FigureSvg';
 import { LazyFigure } from './LazyFigure';
 import { useRef } from 'react';
 import { useWave } from './useWave';
-import { isTouchOnly, useScrollWave } from './useScrollWave';
-import type { WaveTiming } from './useWave';
+import { useScrollWave } from './useScrollWave';
 
-// Десктоп (курсор) — тайминги брендбука: 600 мс, 50 мс на кольцо.
-// Телефон (волна от прокрутки) — медленнее, по просьбе владельца: 1000 мс, 90 мс на кольцо.
-const TOUCH_TIMING: WaveTiming = { duration: 1000, stagger: 90 };
-const DESKTOP_TIMING: WaveTiming = { duration: 600, stagger: 50 };
-const timing = () => (isTouchOnly() ? TOUCH_TIMING : DESKTOP_TIMING);
+// Десктоп (курсор) — тайминги брендбука (600 мс, 50 мс на кольцо, по умолчанию в useWave).
+// Телефон — scrub от прокрутки (useScrollWave), скорость задаёт палец.
 
 type FigureProps = { intensity?: number; className?: string };
 
@@ -22,15 +18,12 @@ const fieldDistance = (p: number, q: number) =>
   Math.max(Math.abs(Math.floor(p / N) - Math.floor(q / N)), Math.abs((p % N) - (q % N)));
 
 // Прокрутка ведёт волну по диагонали поля: (0,0) → (5,5)
-const fieldPick = (t: number) => {
-  const k = Math.min(N - 1, Math.floor(t * N));
-  return k * N + k;
-};
+const fieldPick = (k: number) => k * N + k;
 
 function KipField({ intensity = 0.6 }: FigureProps) {
-  const { values, activate } = useWave(N * N, fieldDistance, timing());
+  const { values, activate, scrub } = useWave(N * N, fieldDistance);
   const ref = useRef<SVGSVGElement>(null);
-  useScrollWave(ref, fieldPick, activate);
+  useScrollWave(ref, { steps: N, count: N * N, distance: fieldDistance }, scrub, fieldPick);
   const m = amplitude(intensity);
   const g: Grid = { s: 26, ox: 229, oy: 150 };
   const solids: Solid[] = [];
@@ -57,12 +50,11 @@ function KipField({ intensity = 0.6 }: FigureProps) {
 const linear = (p: number, q: number) => Math.abs(p - q);
 
 // Прокрутка ведёт волну по модулям слева направо
-const railPick = (t: number) => Math.min(7, Math.floor(t * 8));
 
 function DinRail({ intensity = 0.6 }: FigureProps) {
-  const { values, activate } = useWave(8, linear, timing());
+  const { values, activate, scrub } = useWave(8, linear);
   const ref = useRef<SVGSVGElement>(null);
-  useScrollWave(ref, railPick, activate);
+  useScrollWave(ref, { steps: 8, count: 8, distance: linear }, scrub);
   const m = amplitude(intensity);
   const g: Grid = { s: 24, ox: 160, oy: 200 };
   const solids: Solid[] = [];
@@ -99,12 +91,11 @@ function DinRail({ intensity = 0.6 }: FigureProps) {
 
 // ── FIG 03 · Стойка: открытая стойка с 6 полками ─────────────────────
 // Прокрутка ведёт волну по полкам снизу вверх (страница едет вверх — волна поднимается)
-const rackPick = (t: number) => Math.min(5, Math.floor(t * 6));
 
 function Rack({ intensity = 0.6 }: FigureProps) {
-  const { values, activate } = useWave(6, linear, timing());
+  const { values, activate, scrub } = useWave(6, linear);
   const ref = useRef<SVGSVGElement>(null);
-  useScrollWave(ref, rackPick, activate);
+  useScrollWave(ref, { steps: 6, count: 6, distance: linear }, scrub);
   const m = amplitude(intensity);
   const g: Grid = { s: 38, ox: 250, oy: 290 };
   const solids: Solid[] = [];

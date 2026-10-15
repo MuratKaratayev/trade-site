@@ -15,9 +15,9 @@ export function Certificates() {
             <li key={c.src}>
               <button type="button" data-cert={i} className="group flex w-full flex-col gap-3 text-left">
                 <span className="relative block aspect-[3/4] w-full overflow-hidden rounded-card border border-line bg-surface transition-colors group-hover:border-text">
-                  <Image src={c.src} alt="" fill sizes="(min-width: 1024px) 25vw, 50vw" className="object-contain p-3" />
+                  <Image src={c.src} alt="" fill sizes="(min-width: 1024px) 20vw, (min-width: 768px) 33vw, 50vw" className="object-contain p-3" />
                 </span>
-                <span className="text-sm">
+                <span className="text-sm [overflow-wrap:anywhere]">
                   <Text>{c.caption}</Text>
                 </span>
               </button>
