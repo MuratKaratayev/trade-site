@@ -1,0 +1,65 @@
+# Сборка сайта для хостинга PS Cloud (Plesk).
+# На каждый push в main: npm run build → готовые файлы из out/ коммитятся в ветку ps-cloud (только они, без исходников).
+# Plesk (раздел «Git» у домена) забирает ветку ps-cloud в папку сайта — см. docs/DEPLOY.md.
+name: Build for PS Cloud
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ps-cloud
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - run: npm run build
+
+      - name: Check build output
+        run: |
+          test -f out/index.html
+          test -f out/.htaccess
+          test -f out/404.html
+
+      # История ветки только дополняется (без force-push): Plesk забирает её обычным git pull
+      - name: Publish out/ to branch ps-cloud
+        env:
+          REPO: https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+        run: |
+          if git ls-remote --exit-code --heads "$REPO" ps-cloud >/dev/null; then
+            git clone -q --depth 1 --branch ps-cloud "$REPO" publish
+          else
+            mkdir publish && git -C publish init -q -b ps-cloud
+          fi
+          find publish -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          cp -a out/. publish/
+          cd publish
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then echo "Сборка не изменилась"; exit 0; fi
+          git commit -q -m "Build of ${GITHUB_SHA::7}"
+          git push -q "$REPO" HEAD:ps-cloud
+
+      # Тот же архив — для ручной загрузки через «Файлы» в Plesk, если Git не настроен
+      - uses: actions/upload-artifact@v4
+        with:
+          name: site-ps-cloud
+          path: out/
+          include-hidden-files: true
+          retention-days: 30
