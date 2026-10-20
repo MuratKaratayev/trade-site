@@ -94,7 +94,7 @@ export function ProductPage({ locale, slug }: { locale: Locale; slug: string }) 
         <aside className="col-span-12 flex flex-col gap-4 self-start rounded-card border border-line bg-surface p-6 lg:col-span-4 lg:col-start-9 lg:row-start-2 lg:row-span-2">
           <h2 className="t-h3">{t.asideTitle}</h2>
           <p className="text-muted">{t.asideText}</p>
-          <Link href={lp('/#lead')} className="btn btn-primary self-start">
+          <Link href={lp('/#contacts')} className="btn btn-primary self-start">
             {t.asideCta}
           </Link>
         </aside>

@@ -52,9 +52,6 @@ export function Footer({ locale }: { locale: Locale }) {
         <span>
           © <CurrentYear buildYear={year} /> {company.legalName}
         </span>
-        <a href={localePath(locale, '/privacy')} className="hover:text-accent-text">
-          {t.footer.privacy}
-        </a>
         <span className="inline-flex items-center gap-[6px]">
           {t.footer.madeBy}{' '}
           <a
