@@ -56,18 +56,4 @@
 <changefreq>monthly</changefreq>
 <priority>0.7</priority>
 </url>
-<url>
-<loc>https://trade-engeeniring.kz/privacy</loc>
-<xhtml:link rel="alternate" hreflang="ru" href="https://trade-engeeniring.kz/privacy" />
-<xhtml:link rel="alternate" hreflang="kk" href="https://trade-engeeniring.kz/kk/privacy" />
-<changefreq>yearly</changefreq>
-<priority>0.2</priority>
-</url>
-<url>
-<loc>https://trade-engeeniring.kz/kk/privacy</loc>
-<xhtml:link rel="alternate" hreflang="ru" href="https://trade-engeeniring.kz/privacy" />
-<xhtml:link rel="alternate" hreflang="kk" href="https://trade-engeeniring.kz/kk/privacy" />
-<changefreq>yearly</changefreq>
-<priority>0.2</priority>
-</url>
 </urlset>
