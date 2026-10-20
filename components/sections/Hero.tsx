@@ -22,7 +22,7 @@ export function Hero({ locale }: { locale: Locale }) {
           </h1>
           <p className="t-body-l max-w-[560px] text-muted">{company.lead}</p>
           <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-            <a href="#lead" className="btn btn-primary">
+            <a href="#contacts" className="btn btn-primary">
               {t.hero.lead}
             </a>
             <a href="#products" className="btn btn-secondary">

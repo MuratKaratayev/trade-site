@@ -9,7 +9,6 @@ export const dynamic = 'force-static';
 const PATHS: { path: string; changeFrequency: 'monthly' | 'yearly'; priority: number }[] = [
   { path: '/', changeFrequency: 'monthly', priority: 1 },
   ...visibleProducts.map((p) => ({ path: `/products/${p.slug}`, changeFrequency: 'monthly' as const, priority: 0.7 })),
-  { path: '/privacy', changeFrequency: 'yearly', priority: 0.2 },
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {
